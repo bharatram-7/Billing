@@ -3,6 +3,8 @@ from . import views
 from .forms import UserLoginForm
 from .views import ActiveMenuList
 from django.urls import path, reverse_lazy, re_path
+from django.conf.urls.static import static
+from django.conf import settings
 from django.views.generic import TemplateView
 
 urlpatterns = [
@@ -13,5 +15,7 @@ urlpatterns = [
                                                          redirect_authenticated_user=True), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('customer/menu/', ActiveMenuList.as_view(), name='menu_list'),
-    path('api/v1/menu/', views.MenuList.as_view(), name='active_menu_list'),
-]
+    path('api/v1/menu/', views.MenuList.as_view(), name='active_menu_items'),
+    path('api/v1/cart/', views.ViewCart.as_view(), name='view_cart'),
+    path('api/v1/cartitem/', views.CreateCartItem.as_view(), name='create_cart_item'),
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

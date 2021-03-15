@@ -6,7 +6,7 @@ from django.contrib.auth.models import Group
 from .forms import CreateUserForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from rest_framework import generics, permissions
-from .serializers import MenuSerializer
+from .serializers import MenuSerializer, ViewCartSerializer, CreateCartSerializer
 # Create your views here.
 
 
@@ -45,6 +45,11 @@ class ActiveMenuList(LoginRequiredMixin, UserPassesTestMixin, ListView):
         except:
             return False
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['name'] = self.request.user.name
+        return context
+
 
 class MenuList(generics.ListCreateAPIView):
     serializer_class = MenuSerializer
@@ -57,5 +62,22 @@ class MenuList(generics.ListCreateAPIView):
         return Menu.objects.filter(active=True)
 
 
+class ViewCart(generics.ListAPIView):
+    serializer_class = ViewCartSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return CartItem.objects.filter(user=self.request.user)
 
 
+class CreateCartItem(generics.CreateAPIView):
+    serializer_class = CreateCartSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        print(serializer)
+        serializer.save(user=self.request.user)
+
+
+class ModifyCartItem(generics.RetrieveUpdateDestroyAPIView):
+    pass

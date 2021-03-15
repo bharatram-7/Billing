@@ -1,0 +1,14 @@
+.my-header{
+    border: 1px solid black;
+    height: 50px;
+}
+
+.menu-side{
+    align-items: right;
+    border-right: 1px solid black;
+    padding: 10px;
+}
+
+.main-content{
+    border-right: 1px solid black;
+}
