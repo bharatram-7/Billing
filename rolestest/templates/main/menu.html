@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Menu
+{% endblock title %}
+
+{% block body %}
+<h2>Menu</h2>
+    <ul>
+        {% for menu in menus %}
+            <li>{{ menu.name }}</li>
+        {% endfor %}
+    </ul>
+<a href="/logout">Logout</a>
+{% endblock body %}
