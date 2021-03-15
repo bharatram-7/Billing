@@ -3,6 +3,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils import timezone
+from .validators import image_restriction
 
 
 class CustomUserManager(BaseUserManager):
@@ -65,7 +66,9 @@ class Item(models.Model):
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=300)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    image = models.ImageField(upload_to='images/%Y/%m/%d', null=True, blank=True)
+    image = models.ImageField(upload_to='images/%Y/%m/%d',
+                              validators=[image_restriction],
+                              null=True, blank=True)
     menu = models.ForeignKey(Menu, on_delete=models.CASCADE, related_name='items')
 
     class Meta:

@@ -41,9 +41,9 @@ Menu
                 <div v-for="item in menu.items">
                     <div class="card mb-3" style="max-width: 740px;">
                       <div class="row no-gutters">
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <div v-if="item.image">
-                                <img :src="item.image" class="card-img" alt="Food">
+                                <img :src="item.image" style="height:128px; width:128px;"class="card-img" alt="Food">
                             </div>
                             <div v-else>
                                 No image available
