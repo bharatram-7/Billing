@@ -28,7 +28,7 @@ class ViewCartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CartItem
-        fields = ['item', 'quantity']
+        fields = ['id', 'item', 'quantity']
 
 
 class CreateCartSerializer(serializers.ModelSerializer):
@@ -38,7 +38,7 @@ class CreateCartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CartItem
-        fields = ['item', 'quantity', 'user']
+        fields = ['id', 'item', 'quantity', 'user']
         validators = [
             UniqueTogetherValidator(
                 queryset=CartItem.objects.all(),
@@ -55,4 +55,4 @@ class UpdateDeleteCartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CartItem
-        fields = ['item', 'quantity', 'user']
+        fields = ['id', 'item', 'quantity', 'user']

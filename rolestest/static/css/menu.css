@@ -4,7 +4,7 @@
 }
 
 .menu-side{
-    align-items: right;
+    text-align: end;
     border-right: 1px solid black;
     padding: 10px;
 }
