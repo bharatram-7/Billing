@@ -51,6 +51,25 @@ class ActiveMenuList(LoginRequiredMixin, UserPassesTestMixin, ListView):
         return context
 
 
+class Checkout(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    template_name = 'main/checkout.html'
+
+    def test_func(self):
+        try:
+            self.request.user.groups.get(name="Customers")
+            return True
+        except:
+            return False
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['name'] = self.request.user.name
+        return context
+
+    def get_queryset(self):
+        return
+
+
 class MenuList(generics.ListCreateAPIView):
     serializer_class = MenuSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -88,3 +107,11 @@ class ModifyCartItem(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return CartItem.objects.filter(user=self.request.user)
+
+
+class OrderList(generics.ListCreateAPIView):
+    serializer_class = OrderListSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Order.objects.filter(user=self.request.user)

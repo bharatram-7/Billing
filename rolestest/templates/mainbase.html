@@ -20,8 +20,27 @@
             }
         </style>
     </head>
-    <body class="overflow-hidden">
+    <body>
+        <div class="container-fluid d-flex h-100 flex-column">
+        <div class="row justify-content-between my-header">
+            <div class="col-md-1 align-self-center">Logo</div>
+            <div class="col-md-4">
+                <div class="row align-items-center">
+                    <div class="col-md-4">Welcome, {{ name }}</div>
+                    <div class="col">
+                        <a href="/customer/checkout">Cart</a>
+                    </div>
+                    <div class="col">
+                        <a href="/customer/orders">Orders</a>
+                    </div>
+                    <div class="col">
+                        <a href="/logout">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
         {% block body %}
         {% endblock body %}
+        </div>
     </body>
 </html>

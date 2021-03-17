@@ -56,3 +56,13 @@ class UpdateDeleteCartSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItem
         fields = ['id', 'item', 'quantity', 'user']
+
+
+class OrderListSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
+
+    class Meta:
+        model = Order
+        fields = '__all__'
