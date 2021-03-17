@@ -140,7 +140,7 @@ class PurchasedItem(models.Model):
     item = models.CharField(max_length=100)
     quantity = models.PositiveSmallIntegerField(blank=False, null=False)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='purchased_items')
 
     class Meta:
         permissions = [

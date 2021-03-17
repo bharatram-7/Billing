@@ -7,11 +7,15 @@ from .forms import CreateUserForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from rest_framework import generics, permissions
 from .serializers import *
+from .permissions import CustomDjangoModelPermissions
 # Create your views here.
 
 
 def home(request):
-    return redirect(reverse('menu_list'))
+    group = request.user.groups.filter(user=request.user)[0]
+    if group.name == "Customers":
+        return redirect(reverse('menu_list'))
+    return redirect(reverse('staff_orders'))
 
 
 def signup(request):
@@ -70,6 +74,45 @@ class Checkout(LoginRequiredMixin, UserPassesTestMixin, ListView):
         return
 
 
+class Orders(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    template_name = 'main/orders.html'
+
+    def test_func(self):
+        try:
+            self.request.user.groups.get(name="Customers")
+            return True
+        except:
+            return False
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['name'] = self.request.user.name
+        return context
+
+    def get_queryset(self):
+        return
+
+
+class OrderItems(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    template_name = 'main/orderdetail.html'
+
+    def test_func(self):
+        try:
+            self.request.user.groups.get(name="Customers")
+            return True
+        except:
+            return False
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user'] = self.request.user
+        context['id'] = self.kwargs['pk']
+        return context
+
+    def get_queryset(self):
+        return
+
+
 class MenuList(generics.ListCreateAPIView):
     serializer_class = MenuSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -111,7 +154,36 @@ class ModifyCartItem(generics.RetrieveUpdateDestroyAPIView):
 
 class OrderList(generics.ListCreateAPIView):
     serializer_class = OrderListSerializer
+    permission_classes = [permissions.IsAuthenticated, CustomDjangoModelPermissions]
+
+    def get_queryset(self):
+        group = self.request.user.groups.filter(user=self.request.user)[0]
+        if group.name == "Customers":
+            return Order.objects.filter(user=self.request.user)
+        elif group.name == "Admin":
+            return Order.objects.all()
+        else:
+            return Order.objects.filter(status="P")
+
+
+class PurchasedItemList(generics.ListCreateAPIView):
+    serializer_class = PurchasedItemSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Order.objects.filter(user=self.request.user)
+        return PurchasedItem.objects.all()
+
+
+class OrderDetail(generics.RetrieveAPIView):
+    serializer_class = OrderListSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        group = self.request.user.groups.filter(user=self.request.user)[0]
+        if group.name == "Customers":
+            return Order.objects.filter(user=self.request.user)
+        elif group.name == "Admin":
+            return Order.objects.all()
+        else:
+            return Order.objects.filter(status="P")
+

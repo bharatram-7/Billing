@@ -1,0 +1,74 @@
+{% extends 'mainbase.html' %}
+
+{% block head %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/menu.css' %}">
+<style>
+    table{
+        counter-reset: Serial;
+    }
+    tr td:first-child:before{
+        counter-increment: Serial;
+        content: counter(Serial);
+    }
+    .btn-custom-delete{
+        margin-left: 20px;
+    }
+</style>
+{% endblock head %}
+
+{% block title %}
+Menu
+{% endblock title %}
+
+{% block body %}
+<div class="row h-100" id="app">
+    <div class="col-md-2"></div>
+    <div class="col">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Order No</th>
+                    <th scope="col">Total</th>
+                    <th scope="col">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="order in orders">
+                    <td></td>
+                    <td><a :href="baseURL + order.id">Order #[[order.id]]</a></td>
+                    <td>[[order.total]]</td>
+                    <td v-if="order.status === 'P'">Pending</td>
+                    <td v-else>Delivered</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="col-md-2"></div>
+</div>
+<script>
+    var app = new Vue({
+        delimiters: ['[[',']]'],
+        el: '#app',
+        data: {
+            orders: [],
+            baseURL: "{% url 'order_list' %}"
+        },
+        mounted: function() {
+            this.getOrder()
+        },
+        methods: {
+            getOrder: function(){
+                axios.get("{% url 'view_order' %}")
+                .then(response => {
+                    this.orders = response.data
+                })
+                .catch(function(error){
+                    console.log(error)
+                })
+            }
+        }
+    });
+</script>
+{% endblock %}

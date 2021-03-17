@@ -136,7 +136,14 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 LOGIN_URL = '/login'
 
-LOGIN_REDIRECT_URL = '/customer/menu/'
+LOGIN_REDIRECT_URL = '/'
 
 LOGOUT_REDIRECT_URL = reverse_lazy('login')
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.DjangoModelPermissions',
+    ]
+}
 

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+          crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+    {% block head %}
+    {% endblock head %}
+    <title>{% block title %}{% endblock title %}</title>
+    <style>
+        html, body {
+          height: 100%;
+        }
+    </style>
+</head>
+<body>
+<div class="container" id="app">
+    <div class="row">
+        <div class="col-xs-12 col">
+            <div class="invoice-title">
+                <h2>Invoice</h2><h3 class="pull-right">Order # {{id}}</h3>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-xs-6 col-md-6">
+                    <address>
+                    <strong>Billed To:</strong><br>
+                        {{user.name}}<br>
+                    </address>
+                </div>
+                <div class="col-xs-6 col-md-6 text-right">
+                    <address>
+                    <strong>Shipped To:</strong><br>
+                        {{user.name}}<br>
+                    </address>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-6 col-md-6">
+                    <address>
+                        <strong>Payment Method:</strong><br>
+                        Cash<br>
+                        {{user.email}}
+                    </address>
+                </div>
+                <div class="col-xs-6 col-md-6 text-right">
+                    <address>
+                        <strong>Order Date:</strong><br>
+                        [[date]]<br><br>
+                    </address>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title"><strong>Order summary</strong></h3>
+                </div>
+                <div class="panel-body">
+                    <div class="table-responsive">
+                        <table class="table table-condensed">
+                            <thead>
+                                <tr>
+                                    <td><strong>Item</strong></td>
+                                    <td class="text-center"><strong>Price</strong></td>
+                                    <td class="text-center"><strong>Quantity</strong></td>
+                                    <td class="text-right"><strong>Totals</strong></td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- foreach ($order->lineItems as $line) or some such thing here -->
+                                <tr v-for="item in orders.purchased_items">
+                                    <td>[[item.item]]</td>
+                                    <td class="text-center">₹[[item.price]]</td>
+                                    <td class="text-center">[[item.quantity]]</td>
+                                    <td class="text-right">₹[[item.quantity * item.price]]</td>
+                                </tr>
+                                <tr>
+                                    <td class="no-line"></td>
+                                    <td class="no-line"></td>
+                                    <td class="no-line text-center"><strong>Grand Total</strong></td>
+                                    <td class="no-line text-right">₹[[orders.total]]</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+var app = new Vue({
+    delimiters: ['[[',']]'],
+    el: '#app',
+    data: {
+        orders: [],
+        date: null
+    },
+    mounted: function() {
+        this.getOrder()
+    },
+    methods: {
+        getOrder: function(){
+            axios.get("{% url 'view_order' %}" + {{ id }})
+            .then(response => {
+                this.orders = response.data
+                console.log(response.data)
+                var msec = Date.parse(this.orders.date);
+                var d = new Date(msec);
+                this.date = d
+            })
+            .catch(function(error){
+                console.log(error)
+            })
+        },
+    }
+});
+</script>
+</body>
