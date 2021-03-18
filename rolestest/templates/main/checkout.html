@@ -183,14 +183,16 @@ Menu
                     "purchased_items": items,
                     "total": this.carttotal
                 }
-                axios.post("{% url 'view_order' %}", payload)
+                axios.post("{% url 'create_order' %}", payload)
                 .then(response =>{
                     alert("Success! Your order was successfully placed")
                 })
                 .catch(function(error){
                     console.log(error)
-                    if (error.data){
+                    if (error.data.detail){
                         alert(error.data.detail)
+                    }else if (error.data.non_field_errors){
+                        alert(error.data.non_field_errors)
                     }else{
                         alert(error.status + ' ' + error.statusText)
                     }

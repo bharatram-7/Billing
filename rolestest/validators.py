@@ -8,3 +8,4 @@ def image_restriction(image):
         raise ValidationError("Image width/height needs to be less than or equal to 900px")
     if not image_width == image_height:
         raise ValidationError("Image width needs to be equal to it's height")
+

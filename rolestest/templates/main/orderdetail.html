@@ -32,13 +32,13 @@
                 <div class="col-xs-6 col-md-6">
                     <address>
                     <strong>Billed To:</strong><br>
-                        {{user.name}}<br>
+                        [[order.user.name]]<br>
                     </address>
                 </div>
                 <div class="col-xs-6 col-md-6 text-right">
                     <address>
                     <strong>Shipped To:</strong><br>
-                        {{user.name}}<br>
+                        [[order.user.name]]<br>
                     </address>
                 </div>
             </div>
@@ -47,7 +47,7 @@
                     <address>
                         <strong>Payment Method:</strong><br>
                         Cash<br>
-                        {{user.email}}
+                        [[order.user.email]]
                     </address>
                 </div>
                 <div class="col-xs-6 col-md-6 text-right">
@@ -79,7 +79,7 @@
                             </thead>
                             <tbody>
                                 <!-- foreach ($order->lineItems as $line) or some such thing here -->
-                                <tr v-for="item in orders.purchased_items">
+                                <tr v-for="item in order.purchased_items">
                                     <td>[[item.item]]</td>
                                     <td class="text-center">₹[[item.price]]</td>
                                     <td class="text-center">[[item.quantity]]</td>
@@ -89,7 +89,7 @@
                                     <td class="no-line"></td>
                                     <td class="no-line"></td>
                                     <td class="no-line text-center"><strong>Grand Total</strong></td>
-                                    <td class="no-line text-right">₹[[orders.total]]</td>
+                                    <td class="no-line text-right">₹[[order.total]]</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -104,7 +104,7 @@ var app = new Vue({
     delimiters: ['[[',']]'],
     el: '#app',
     data: {
-        orders: [],
+        order: [],
         date: null
     },
     mounted: function() {
@@ -114,9 +114,9 @@ var app = new Vue({
         getOrder: function(){
             axios.get("{% url 'view_order' %}" + {{ id }})
             .then(response => {
-                this.orders = response.data
+                this.order = response.data
                 console.log(response.data)
-                var msec = Date.parse(this.orders.date);
+                var msec = Date.parse(this.order.date);
                 var d = new Date(msec);
                 this.date = d
             })

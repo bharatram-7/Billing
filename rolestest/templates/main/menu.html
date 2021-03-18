@@ -101,7 +101,7 @@ Menu
                 this.$parent.getcartitems()
             })
             .catch(function(error){
-                alert(error)
+                alert(error.data)
                 this.count--
             })
         },
@@ -109,9 +109,11 @@ Menu
             axios.delete("{% url 'view_cart_item' %}" + this.cartitemid)
             .then(response =>{
                 this.$parent.getcartitems()
+                this.$parent.itemquantity[this.id] = 0
             })
             .catch(function(error){
                 console.log(error.data)
+                this.count++
             })
         },
         decider: function(typ){
@@ -166,7 +168,7 @@ Menu
         methods: {
             getcartitems: function(){
             axios.get("{% url 'view_cart_item' %}")
-            .then(function(response){
+            .then(response => {
                 for (var cartitem of response.data){
                     Vue.set(app.cartitems, cartitem.item, cartitem.id)
                     Vue.set(app.itemquantity, cartitem.item, cartitem.quantity)

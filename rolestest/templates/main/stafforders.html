@@ -3,6 +3,7 @@
 {% block head %}
 {% load static %}
 <link rel="stylesheet" href="{% static 'css/menu.css' %}">
+
 <style>
     table{
         counter-reset: Serial;
@@ -28,53 +29,50 @@ Menu
                     <th scope="col">#</th>
                     <th scope="col">Order No</th>
                     <th scope="col">Total</th>
-                    <th scope="col">Status</th>
+                    <th scope="col">Action</th>
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="order in orders">
-                    <td></td>
-                    <td><a :href="baseURL + order.id">Order #[[order.id]]</a></td>
-                    <td>[[order.total]]</td>
-                    <td v-if="order.status === 'P'">Pending</td>
-                    <td v-else>Delivered</td>
+                <tr v-for="order in orders" v-if="order.status === 'P'">
+                        <td></td>
+                        <td><a :href="baseURL + order.id">Order #[[order.id]]</a></td>
+                        <td>[[order.total]]</td>
+                        <td><deliver :key="order.id" :order_id="order.id"></deliver></td>
                 </tr>
             </tbody>
         </table>
     </div>
-    <template>
-        <div>
-            <b-table small :fields="fields" :items="orders" responsive="sm">
-                <template #cell(index)="data">
-                    [[ data.index + 1 ]]
-                </template>
-
-                <template #cell(id)="data">
-                    <a :href=" baseURL + data.item.id ">[[ data.item.id ]]</a>
-                </template>
-
-                <template #cell(status)="data">
-                    <div v-if="data.item.status === 'P'">Pending</div>
-                    <div v-if="data.item.status === 'D'">Delivered</div>
-                </template>
-            </b-table>
-        </div>
-    </template>
     <div class="col-md-2"></div>
 </div>
-
 <script>
+    axios.defaults.xsrfCookieName = 'csrftoken';
+    axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
+    Vue.component('deliver', {
+    props: ['order_id'],
+    data: function(){
+        return{
+        }
+    },
+    methods: {
+        update: function(){
+            axios.patch("{% url 'root' %}" + "api/v1/updateorder/" + this.order_id, {
+                status: "D"
+            })
+            .then(response =>{
+                this.$parent.getOrder()
+            })
+            .catch(function(error){
+                alert(error.data)
+            })
+        }
+    },
+    template: `<button @click="update()" type="button" class="btn btn-secondary">Deliver</button>`
+    });
+
     var app = new Vue({
         delimiters: ['[[',']]'],
         el: '#app',
         data: {
-            fields: [
-                'index',
-                {key: 'id', label: 'Order ID'},
-                'date',
-                'total',
-                'status'
-            ],
             orders: [],
             baseURL: "{% url 'order' %}"
         },
@@ -86,7 +84,6 @@ Menu
                 axios.get("{% url 'view_order' %}")
                 .then(response => {
                     this.orders = response.data
-                    console.log(this.orders)
                 })
                 .catch(function(error){
                     console.log(error)

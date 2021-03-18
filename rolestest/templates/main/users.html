@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Load required Bootstrap and BootstrapVue CSS -->
+<link type="text/css" rel="stylesheet" href="//unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
+<link type="text/css" rel="stylesheet" href="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.css" />
+
+<!-- Load polyfills to support older browsers -->
+<script src="//polyfill.io/v3/polyfill.min.js?features=es2015%2CIntersectionObserver" crossorigin="anonymous"></script>
+
+<!-- Load Vue followed by BootstrapVue -->
+<script src="//unpkg.com/vue@latest/dist/vue.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+<script src="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.js"></script>
+    <meta charset="UTF-8">
+    <title>Users</title>
+</head>
+<body>
+<div class="container pt-3 pb-5" >
+    <template id="app">
+        <div>
+            <b-row>
+                <b-col md="6">
+                    <b-form-input
+                          id="filter-input"
+                          v-model="filter"
+                          type="search"
+                          placeholder="Type to Search"
+                        >
+                    </b-form-input>
+                </b-col>
+                <b-col md="6">
+                    <a href="{% url 'add_user' %}" class="btn btn-primary" role="button" aria-pressed="true">Add New User</a>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col>
+                    <b-table border striped hover sort-icon-left :filter="filter"  :fields="fields" :items="users"
+                             :per-page="perPage" :current-page="currentPage" responsive="sm" >
+                      <!-- A virtual column -->
+                      <template #cell(index)="data">
+                        [[ data.index + 1 ]]
+                      </template>
+
+                      <!-- A custom formatted column -->
+                      <template #cell(name)="data">
+                        <a :href=" baseURL + data.item.id ">[[ data.item.name ]]</a>
+                      </template>
+
+                      <!-- A virtual composite column -->
+                      <template #cell(email)="data">
+                        [[ data.item.email ]]
+                      </template>
+
+                      <template #cell(id)="data">
+                          <a :href=" baseURL + data.item.id ">Edit</a>
+                      </template>
+                    </b-table>
+                    <b-pagination v-model="currentPage" :total-rows="rows" :per-page="perPage"></b-pagination>
+                </b-col>
+            </b-row>
+        </div>
+    </template>
+</div>
+<script>
+    var app = new Vue({
+        delimiters: ['[[',']]'],
+        el: '#app',
+        data: function(){
+            return{
+                fields: [
+                    'index',
+                    {
+                    key: 'name',
+                    sortable: true
+                    },
+                    {
+                    key: 'email',
+                    sortable: true
+                    },
+                    {
+                    key: 'id',
+                    label: 'Actions'
+                    }
+                ],
+                users: [],
+                baseURL: "{% url 'users' %}",
+                filter: '',
+                perPage: 10,
+                currentPage: 1
+            }
+        },
+        mounted: function() {
+            this.getUsers()
+        },
+        computed:{
+            rows() {
+                return this.users.length
+            }
+        },
+        methods: {
+            getUsers: function(){
+            axios.get("{% url 'user_list' %}")
+            .then(response => {
+                this.users = response.data
+            })
+            .catch(function(error){
+                alert(error)
+            })
+            },
+        }
+    });
+</script>
+</body>
+</html>

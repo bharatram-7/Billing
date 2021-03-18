@@ -28,6 +28,19 @@ class CreateUserForm(UserCreationForm):
         fields = ['email', 'name', 'password1', 'password2']
 
 
+class CreateStaffForm(CreateUserForm):
+    ROLE_CHOICES = [
+        ('Admin', 'Admin'),
+        ('Billing Clerk', 'Billing Clerk')
+    ]
+
+    role = forms.ChoiceField(choices=ROLE_CHOICES)
+
+    class Meta:
+        model = CustomUser
+        fields = ['email', 'name', 'password1', 'password2', 'role']
+
+
 class UserLoginForm(AuthenticationForm):
 
     class Meta:

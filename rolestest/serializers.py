@@ -6,7 +6,7 @@ from .models import *
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = '__all__'
+        fields = ['id', 'name', 'email']
 
 
 class ItemSerializer(serializers.ModelSerializer):
@@ -68,11 +68,9 @@ class PurchasedItemSerializer(serializers.ModelSerializer):
         }
 
 
-class OrderListSerializer(serializers.ModelSerializer):
-    user = serializers.HiddenField(
-        default=serializers.CurrentUserDefault()
-    )
-    purchased_items = PurchasedItemSerializer(many=True)
+class OrderWithItemsSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    purchased_items = PurchasedItemSerializer(many=True, required=True)
 
     class Meta:
         model = Order
@@ -93,8 +91,15 @@ class OrderListSerializer(serializers.ModelSerializer):
             return order
         except Exception as e:
             order.delete()
-            print(e)
-            return e
+            return
+
+    def validate(self, data):
+        """
+        Check that purchased items exist
+        """
+        if not data['purchased_items']:
+            raise serializers.ValidationError("There needs to be at least one item to create an order")
+        return data
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -105,4 +110,5 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = '__all__'
-        read_only_fields = ['date']
+        read_only_fields = ['date', 'total']
+
