@@ -13,19 +13,9 @@ class CreateUserForm(UserCreationForm):
         attrs={'label': 'Your Name'}
     ))
 
-    password1 = forms.CharField(widget=forms.PasswordInput(
-        attrs={'class': 'text-input',
-               'label': 'Create Password'}
-    ))
-
-    password2 = forms.CharField(widget=forms.PasswordInput(
-        attrs={'class': 'text-input',
-               'label': 'Re-enter Password'}
-    ))
-
     class Meta:
         model = CustomUser
-        fields = ['email', 'name', 'password1', 'password2']
+        fields = ['email', 'name']
 
 
 class CreateStaffForm(CreateUserForm):

@@ -3,15 +3,6 @@
 {% block head %}
 {% load static %}
 <link rel="stylesheet" href="{% static 'css/menu.css' %}">
-<style>
-    table{
-        counter-reset: Serial;
-    }
-    tr td:first-child:before{
-        counter-increment: Serial;
-        content: counter(Serial);
-    }
-</style>
 {% endblock head %}
 
 {% block title %}

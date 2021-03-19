@@ -1,0 +1,82 @@
+{% extends 'mainbase.html' %}
+
+{% block body %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-2"></div>
+        <div class="col-md-8" id="app">
+            <template>
+                <div>
+                    <h2> Edit User </h2>
+                    <b-form @submit="editUser">
+                        <b-form-group label="Name" id="name-group"
+                                      label-for="name" v-model="user_data.name">
+                            <b-form-input
+                              id="name"
+                              v-model="user_data.name"
+                              placeholder="Enter name"
+                              required
+                            ></b-form-input>
+                        </b-form-group>
+                        <b-form-group label="Email Address" id="email-group"
+                                      label-for="email" >
+                            <b-form-input
+                              id="email"
+                              v-model="user_data.email"
+                              type="email"
+                              placeholder="Enter email"
+                              required
+                            ></b-form-input>
+                        </b-form-group>
+                        <b-button type="submit" variant="primary">Save</b-button>
+                    </b-form>
+                </div>
+            </template>
+        </div>
+        <div class="col-md-2"></div>
+    </div>
+</div>
+
+
+
+<script>
+    axios.defaults.xsrfCookieName = 'csrftoken';
+    axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
+    var app = new Vue({
+        delimiters: ['[[',']]'],
+        el: '#app',
+        data() {
+            return{
+                user_data: null
+            }
+        },
+        mounted: function() {
+            this.getUser()
+        },
+        methods: {
+            getUser: function(){
+                axios.get("{% url 'user_list' %}" + {{ id }})
+                .then(response =>{
+                    this.user_data = response.data
+                })
+                .catch(error => {
+                    console.log(error.data)
+                    alert("Unable to fetch data")
+                })
+            },
+            editUser: function(event){
+                event.preventDefault()
+                axios.put("{% url 'user_list' %}" + {{ id }}, this.user_data)
+                .then(response => {
+                    alert("Successfully saved!")
+                })
+                .catch(error => {
+                    console.log(error)
+                    alert("Something went wrong while saving the details")
+                })
+            }
+        }
+    });
+</script>
+
+{% endblock body %}

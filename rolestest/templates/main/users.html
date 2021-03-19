@@ -1,25 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<!-- Load required Bootstrap and BootstrapVue CSS -->
-<link type="text/css" rel="stylesheet" href="//unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
-<link type="text/css" rel="stylesheet" href="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.css" />
+{% extends 'mainbase.html' %}
 
-<!-- Load polyfills to support older browsers -->
-<script src="//polyfill.io/v3/polyfill.min.js?features=es2015%2CIntersectionObserver" crossorigin="anonymous"></script>
+{% block head %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/menu.css' %}">
+{% endblock head %}
 
-<!-- Load Vue followed by BootstrapVue -->
-<script src="//unpkg.com/vue@latest/dist/vue.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
-<script src="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.js"></script>
-    <meta charset="UTF-8">
-    <title>Users</title>
-</head>
-<body>
-<div class="container pt-3 pb-5" >
-    <template id="app">
+{% block title %}
+Users
+{% endblock title %}
+
+{% block body %}
+<div class="container pt-3 pb-5" id="app" >
+    <template>
         <div>
-            <b-row>
+            <b-row class="mb-3" align-h="between">
                 <b-col md="6">
                     <b-form-input
                           id="filter-input"
@@ -29,7 +23,7 @@
                         >
                     </b-form-input>
                 </b-col>
-                <b-col md="6">
+                <b-col md="6" class="text-right">
                     <a href="{% url 'add_user' %}" class="btn btn-primary" role="button" aria-pressed="true">Add New User</a>
                 </b-col>
             </b-row>
@@ -111,5 +105,4 @@
         }
     });
 </script>
-</body>
-</html>
+{% endblock body %}

@@ -15,8 +15,15 @@ class ItemSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class MenuSerializer(serializers.ModelSerializer):
+class MenuWithItemsSerializer(serializers.ModelSerializer):
     items = ItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Menu
+        fields = '__all__'
+
+
+class MenuSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Menu

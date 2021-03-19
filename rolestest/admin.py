@@ -9,7 +9,7 @@ from django.contrib.auth.models import Group
 class CustomUserAdmin(UserAdmin):
     add_fieldsets = (None, {'fields': ('email', 'name', 'password1', 'password2')}),
     fieldsets = (
-        (None, {'fields': ('email', 'name', 'password')}),
+        (None, {'fields': ('email', 'name', 'password', 'user_activated')}),
     )
     ordering = ('email',)
     search_fields = ('email',)

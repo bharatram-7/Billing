@@ -7,8 +7,21 @@
     text-align: end;
     border-right: 1px solid black;
     padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .main-content{
     border-right: 1px solid black;
+    height: 100%;
+    overflow-y: scroll;
+}
+
+    text-align: end;
+    border-right: 1px solid black;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
