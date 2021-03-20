@@ -1,14 +1,13 @@
-from django.shortcuts import render, redirect, reverse
-from django.contrib.auth import authenticate, login
-from django.views.generic import ListView
+from django.shortcuts import render, redirect, reverse, get_object_or_404
+from django.contrib.auth import login
+from django.views.generic import ListView, View
 from .models import *
 from django.contrib.auth.models import Group
-from .forms import CreateUserForm, CreateStaffForm
+from .forms import CreateUserForm, CreateStaffForm, ItemForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from rest_framework import generics, permissions
 from .serializers import *
-from .permissions import CustomDjangoModelPermissions
-from django.http import HttpResponse
+from .permissions import CustomDjangoModelPermissions, OrderStatusPermission, OrderRatingPermission
 
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.sites.shortcuts import get_current_site
@@ -126,6 +125,9 @@ class Orders(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        group = self.request.user.groups.filter(user=self.request.user)[0]
+        if group:
+            context['group'] = group.name
         context['name'] = self.request.user.name
         return context
 
@@ -139,6 +141,25 @@ class OrderItems(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['user'] = self.request.user
+        context['id'] = self.kwargs['pk']
+        return context
+
+    def get_queryset(self):
+        return
+
+
+class OrderRatingView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    template_name = 'main/orderrating.html'
+
+    def test_func(self):
+        try:
+            self.request.user.groups.get(name="Customers")
+            return True
+        except:
+            return False
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         context['id'] = self.kwargs['pk']
         return context
 
@@ -215,15 +236,91 @@ class MenusView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     def get_queryset(self):
         return
 
+
+class MenuDetailView(LoginRequiredMixin, UserPassesTestMixin, View):
+    template_name = 'main/adminmenudetail.html'
+    form_class = ItemForm
+
+    def get(self, request, *args, **kwargs):
+        form = self.form_class()
+        context = {
+            "form": form,
+            "id": kwargs['pk']
+        }
+        return render(request, self.template_name, context=context)
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST, request.FILES)
+        if form.is_valid():
+            form = form.save(commit=False)
+            menu_id = request.POST.get('menu')
+            menu = Menu.objects.get(id=menu_id)
+            form.menu = menu
+            print(form.menu)
+            form.save()
+            return redirect('menu_detail_view', pk=menu_id)
+        else:
+            pass
+        context = {
+            "form": form,
+            "id": kwargs['pk']
+        }
+        return render(request, self.template_name, context=context)
+
+    def test_func(self):
+        try:
+            self.request.user.groups.get(name="Admin")
+            return True
+        except:
+            return False
+
+
+class ItemDetailView(LoginRequiredMixin, UserPassesTestMixin, View):
+    template_name = 'main/adminitemdetail.html'
+    form_class = ItemForm
+
+    def get(self, request, *args, **kwargs):
+        item = get_object_or_404(Item, pk=kwargs['pk'])
+        form = self.form_class(instance=item)
+        context = {
+            "form": form,
+            "id": kwargs['pk'],
+            "menu_id": kwargs['menu_id']
+        }
+        return render(request, self.template_name, context=context)
+
+    def post(self, request, *args, **kwargs):
+        item = get_object_or_404(Item, pk=kwargs['pk'])
+        form = self.form_class(request.POST, request.FILES, instance=item)
+        if form.is_valid():
+            form = form.save(commit=False)
+            menu_id = request.POST.get('menu')
+            menu = Menu.objects.get(id=menu_id)
+            form.menu = menu
+            print(form.menu)
+            form.save()
+            return redirect('menu_detail_view', pk=menu_id)
+        else:
+            pass
+        context = {
+            "form": form,
+            "id": kwargs['pk']
+        }
+        return render(request, self.template_name, context=context)
+
+    def test_func(self):
+        try:
+            self.request.user.groups.get(name="Admin")
+            return True
+        except:
+            return False
+
 # REST APIs from here
 
 
 class MenuWithItemList(generics.ListAPIView):
     serializer_class = MenuWithItemsSerializer
     permission_classes = [permissions.IsAuthenticated, CustomDjangoModelPermissions]
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
 
     def get_queryset(self):
         return Menu.objects.filter(active=True)
@@ -327,7 +424,7 @@ class OrderWithItemsDetail(generics.RetrieveAPIView):
 
 class OrderUpdate(generics.UpdateAPIView):
     serializer_class = OrderSerializer
-    permission_classes = [permissions.IsAuthenticated, CustomDjangoModelPermissions]
+    permission_classes = [permissions.IsAuthenticated, CustomDjangoModelPermissions, OrderStatusPermission]
 
     def get_queryset(self):
         group = self.request.user.groups.filter(user=self.request.user)[0]
@@ -335,6 +432,18 @@ class OrderUpdate(generics.UpdateAPIView):
             return Order.objects.filter(user=self.request.user)
         else:
             return Order.objects.all()
+
+
+class OrderRating(generics.RetrieveUpdateAPIView):
+    serializer_class = OrderRatingSerializer
+    permission_classes = [permissions.IsAuthenticated, CustomDjangoModelPermissions, OrderRatingPermission]
+
+    def get_queryset(self):
+        group = self.request.user.groups.filter(user=self.request.user)[0]
+        if group.name == "Customers":
+            return Order.objects.filter(user=self.request.user)
+        else:
+            return Order.objects.none()
 
 
 class PurchasedItemList(generics.ListCreateAPIView):

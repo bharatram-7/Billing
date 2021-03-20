@@ -1,5 +1,5 @@
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from .models import CustomUser
+from .models import CustomUser, Item
 from django import forms
 
 
@@ -35,3 +35,13 @@ class UserLoginForm(AuthenticationForm):
 
     class Meta:
         model = CustomUser
+
+
+class ItemForm(forms.ModelForm):
+
+    class Meta:
+        model = Item
+        exclude = ['menu']
+
+
+

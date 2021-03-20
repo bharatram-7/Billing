@@ -11,63 +11,92 @@ Menu
 
 {% block body %}
 <div class="row h-100" id="app">
-    <div class="col-md-2"></div>
-    <div class="col">
-        <table class="table" id="orders-table">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Order No</th>
-                    <th scope="col">Total</th>
-                    <th scope="col">Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="order in orders">
-                    <td></td>
-                    <td><a :href="baseURL + order.id">Order #[[order.id]]</a></td>
-                    <td>[[order.total]]</td>
-                    <td v-if="order.status === 'P'">Pending</td>
-                    <td v-else>Delivered</td>
-                </tr>
-            </tbody>
-        </table>
+    <div class="col-md-2 bg-light">
+
     </div>
+    <div class="col">
     <template>
         <div>
-            <b-table small :fields="fields" :items="orders" responsive="sm">
+            <b-table fixed hover :fields="fields" :items="orders" responsive="sm" class="text-center align-items-center"
+                     :per-page="perPage" :current-page="currentPage" responsive="sm">
                 <template #cell(index)="data">
                     [[ data.index + 1 ]]
                 </template>
 
                 <template #cell(id)="data">
-                    <a :href=" baseURL + data.item.id ">[[ data.item.id ]]</a>
+                    <a :href=" baseURL + data.item.id "> Order #[[ data.item.id ]]</a>
                 </template>
 
                 <template #cell(status)="data">
                     <div v-if="data.item.status === 'P'">Pending</div>
                     <div v-if="data.item.status === 'D'">Delivered</div>
                 </template>
+
+                <template #cell(rating)="data">
+                    <div v-if="data.item.status === 'D'">
+                        <div v-if="data.item.rating">
+                            <b-form-rating id="rating-inline" variant="warning" no-border
+                                           readonly inline :value="data.item.rating"></b-form-rating>
+                        </div>
+                        <div v-else>
+                            {% if group == "Customers" %}
+                            <a :href="data.item.id + '/rating'" class="btn btn-primary">Rate us</a>
+                            {% else %}
+                            <button class="btn btn-secondary">N/A</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div v-else>
+                        <button class="btn btn-secondary">N/A</button>
+                    </div>
+                </template>
             </b-table>
+            <b-pagination v-model="currentPage" :total-rows="rows" :per-page="perPage"></b-pagination>
         </div>
     </template>
-    <div class="col-md-2"></div>
+    </div>
+    <div class="col-md-2 bg-light"></div>
 </div>
 
 <script>
+    Vue.component('rating', {
+        props: ['rating'],
+        methods: {
+            deleteItem: function(){
+                axios.delete(this.$root.api_url + this.id)
+                .then(response => {
+                    this.$root.getMenu()
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+            }
+        },
+        template: '<b-form-rating id="rating-inline" inline value="rating"></b-form-rating>'
+    });
+
     var app = new Vue({
         delimiters: ['[[',']]'],
         el: '#app',
         data: {
             fields: [
                 'index',
-                {key: 'id', label: 'Order ID'},
-                'date',
-                'total',
-                'status'
+                {key: 'id', label: 'Order ID', sortable: true},
+                {key: 'date', label: 'Date', sortable: true},
+                {key: 'total', label: 'Total', sortable: true},
+                {key: 'status', label: 'Status', sortable: true},
+                {key: 'rating', label: 'Rating'}
             ],
             orders: [],
-            baseURL: "{% url 'order' %}"
+            baseURL: "{% url 'order' %}",
+            perPage: 14,
+            currentPage: 1
+
+        },
+        computed:{
+            rows() {
+                return this.orders.length
+            }
         },
         mounted: function() {
             this.getOrder()

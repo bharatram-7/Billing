@@ -1,0 +1,199 @@
+{% extends 'mainbase.html' %}
+
+{% block head %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/menu.css' %}">
+
+{% endblock head %}
+
+{% block title %}
+Menu
+{% endblock title %}
+
+{% block body %}
+<div class="row h-100" id="app">
+    <div class="col-md-1 bg-light"></div>
+    <div class="col-md-4 px-3 py-3">
+        <div class="container-fluid mb-5">
+            <h5>Menu Details</h5>
+            <hr class="solid">
+            <b-card bg-variant="light" text-variant="black" :title="menu_data.name">
+              <b-card-text>
+                Wanna edit the name?
+              </b-card-text>
+              <b-button href="#" v-b-modal.update variant="primary">Change Name</b-button>
+              <b-button @click="toggle()" v-if="is_active" href="#" variant="danger">Deactivate</b-button>
+              <b-button @click="toggle()" v-else href="#" variant="success">Activate</b-button>
+              <b-modal id="update"
+                     title="Change Menu Name"
+                     @show="resetModal"
+                     @ok="handleOk"
+                     @hidden="resetModal"
+              >
+                <form ref="form" @submit.stop.prevent="createMenu">
+                    <b-form-group
+                      label="Name"
+                      label-for="name-input"
+                      :state="name_state"
+                      invalid-feedback="Name is required"
+                    >
+                        <b-form-input
+                            id="name-input"
+                            v-model="menu_name_change"
+                            :state="name_state"
+                            required
+                        ></b-form-input>
+                    </b-form-group>
+                </form>
+            </b-modal>
+            </b-card>
+        </div>
+        <div class="container">
+        <hr class="solid">
+        </div>
+        <div class="container mt-3">
+            <h4>Create New Item</h4>
+                <hr class="solid">
+            <b-card bg-variant="light" text-variant="black">
+                {% load crispy_forms_tags %}
+                <form method="post" enctype='multipart/form-data'>
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <input type="number" name="menu" value="{{ id }}" style="display: none; disabled: true;">
+                    <button type="submit" class="btn btn-primary">Create</button>
+                </form>
+            </b-card>
+        </div>
+    </div>
+    <div class="col-md-5 px-3 py-3">
+        <div class="container-fluid" id="menu-item-container">
+            <h5>Menu Items</h5>
+            <hr class="solid">
+
+            <b-card v-for="item in menu_data.items" class="mb-3">
+                <div class="row">
+                    <div class="col-md-9">
+                        <b-img class="mr-3" v-if="item.image" left :src="item.image" alt="No image found" width="120px" height="120px"></b-img>
+                        <b-img class="mr-3" v-else left src="{% static 'img/no-image.jpg' %}" alt="No image found" width="120px" height="120px"></b-img>
+                        <b-card-text><h5>[[ item.name ]]</h5></b-card-text>
+                        <b-card-text>[[ item.description ]]</b-card-text>
+                    </div>
+                    <div class="col text-right d-flex flex-column justify-contents-center">
+                        <a :href=" menu_data.id + '/items/' + item.id" class="btn btn-primary my-2">Edit Item</a>
+                        <trash :id="item.id" :key="item.id"></trash>
+                    </div>
+                </div>
+            </b-card>
+        </div>
+    </div>
+    <div class="col-md-1 px-3 py-3 bg-light">
+
+    </div>
+</div>
+
+<script>
+axios.defaults.xsrfCookieName = 'csrftoken';
+axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
+
+Vue.component('trash', {
+        props: ['id'],
+        methods: {
+            deleteItem: function(){
+                axios.delete(this.$root.api_url + this.id)
+                .then(response => {
+                    this.$root.getMenu()
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+            }
+        },
+        template: '<button @click="deleteItem" class="btn btn-danger my-2">Delete</button>'
+    });
+
+var app = new Vue({
+        delimiters: ['[[',']]'],
+        el: '#app',
+        data: function(){
+            return{
+                menu_name: null,
+                menu_name_change: null,
+                name_state: null,
+                is_active: null,
+                menu_data: null,
+                api_url: "/api/v1/items/"
+            }
+        },
+        mounted: function() {
+            this.getMenu()
+        },
+        methods: {
+            toggle: function(){
+                value = !this.is_active
+                axios.put("{% url 'all_menus' %}" + {{ id }}, {
+                    name: this.menu_name,
+                    active: value
+                })
+                .then(response => {
+                    this.is_active = response.data.active
+                })
+                .catch(error => {
+                    console.log(error)
+                    alert("Something went wrong!")
+                    return
+                })
+            },
+            checkFormValidity: function(){
+                const valid = this.$refs.form.checkValidity()
+                this.name_state = valid
+                return valid
+            },
+            getMenu: function(){
+                this.active = []
+                this.inactive = []
+                axios.get("{% url 'all_menus' %}" + {{ id }})
+                .then(response => {
+                    this.menu_data = response.data
+                    this.is_active = response.data.active
+                    this.menu_name = response.data.name
+                })
+                .catch(function(error){
+                    console.log(error)
+                    alert("Something went wrong")
+                })
+            },
+            updateMenu: function(){
+                if (!this.checkFormValidity()){
+                    return
+                }
+                axios.put("{% url 'all_menus' %}" + {{ id }}, {
+                    name: this.menu_name_change
+                })
+                .then(response => {
+                    alert("Update successful")
+                    this.menu_name = response.data.name
+                })
+                .catch(error => {
+                    console.log(error)
+                    alert("Something went wrong!")
+                    return
+                })
+
+                this.$nextTick(() => {
+                    this.$bvModal.hide('update')
+                })
+            },
+            resetModal: function(){
+                this.menu_name_change = this.menu_name
+                this.name_state = null
+            },
+            handleOk: function(event){
+                event.preventDefault()
+                this.updateMenu()
+                this.getMenu()
+            },
+        }
+    });
+</script>
+
+{% endblock body %}

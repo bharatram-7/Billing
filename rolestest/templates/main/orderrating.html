@@ -1,0 +1,83 @@
+{% extends 'mainbase.html' %}
+
+{% block head %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/menu.css' %}">
+{% endblock head %}
+
+{% block title %}
+Users
+{% endblock title %}
+
+{% block body %}
+<div class="row h-100" id="app">
+    <div class="col-md-2 bg-light">
+
+    </div>
+    <div class="col">
+        <div class="container my-3"></div>
+        <h4 class="text-center">Rate your experience with us</h4>
+        <hr class="solid">
+        <b-alert v-model="showDismissibleAlert" variant="danger" dismissible>
+            Please pick a rating and click "Submit"
+        </b-alert>
+        <b-card>
+            <b-card-text class="text-center">
+                Thanks for ordering from us! We hope you enjoyed our delicious meal :) <br>
+                We thrive to make our customers happy and your valuable feedback is key to our success <br>
+                <br><br>
+                On a scale of 1 to 5, please rate your experience with us.
+                <br><br>
+                <b-form-rating size="lg" no-border v-model="rating" variant="warning" class="mb-2">
+                </b-form-rating>
+                <button @click="submitRating()" class="btn btn-primary">Submit feedback</button>
+            </b-card-text>
+        </b-card>
+    </div>
+    <div class="col-md-2 bg-light"></div>
+</div>
+<script>
+    axios.defaults.xsrfCookieName = 'csrftoken';
+    axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
+    var app = new Vue({
+        delimiters: ['[[',']]'],
+        el: '#app',
+        data: {
+            order: null,
+            rating: null,
+            showDismissibleAlert: false
+        },
+        mounted: function() {
+            this.getOrder()
+        },
+        methods: {
+            getOrder: function(){
+                axios.get("{% url 'view_order' %}" + {{ id }})
+                .then(response => {
+                    this.orders = response.data
+                    console.log(this.order)
+                })
+                .catch(function(error){
+                    console.log(error)
+                })
+            },
+            submitRating: function(){
+                if (!this.rating){
+                    this.showDismissibleAlert=true
+                    return
+                }
+                axios.put("{% url 'view_order' %}" + {{ id }} + "/rating", {
+                    rating: this.rating
+                })
+                .then(response => {
+                    alert("Thanks for your feedback")
+                    window.location.href = "{% url 'order' %}"
+                })
+                .catch(function(error){
+                    console.log(error)
+                })
+            }
+        }
+    });
+</script>
+{% endblock body%}

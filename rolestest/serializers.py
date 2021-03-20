@@ -21,6 +21,7 @@ class MenuWithItemsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Menu
         fields = '__all__'
+        read_only_fields = ['items']
 
 
 class MenuSerializer(serializers.ModelSerializer):
@@ -113,9 +114,35 @@ class OrderSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault()
     )
+    date = serializers.DateTimeField(format='%Y-%m-%d %H:%M')
 
     class Meta:
         model = Order
         fields = '__all__'
-        read_only_fields = ['date', 'total']
+        read_only_fields = ['date', 'total', 'rating']
 
+
+class OrderRatingSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
+    rating = serializers.IntegerField()
+    status = serializers.CharField(read_only=True)
+
+    def validate_rating(self, value):
+
+        if self.instance.status == "P":
+            raise serializers.ValidationError('You can only rate a Delivered order')
+
+        if value is None:
+            raise serializers.ValidationError('This field is required')
+
+        if value > 5 or value < 1:
+            raise serializers.ValidationError('Please select a value between 1 and 5 inclusive')
+
+        return value
+
+    class Meta:
+        model = Order
+        fields = '__all__'
+        read_only_fields = ['date', 'total', 'status']

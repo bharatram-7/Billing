@@ -111,6 +111,14 @@ class CartItem(models.Model):
 
 
 class Order(models.Model):
+
+    class Rating(models.IntegerChoices):
+        POOR = 1
+        BAD = 2
+        OKAY = 3
+        GOOD = 4
+        EXCELLENT = 5
+
     PENDING = "P"
     DELIVERED = "D"
     STATUS_CHOICES = [
@@ -126,6 +134,7 @@ class Order(models.Model):
         choices=STATUS_CHOICES,
         default=PENDING
     )
+    rating = models.IntegerField(choices=Rating.choices, null=True, blank=True, default=None)
 
     class Meta:
         permissions = [

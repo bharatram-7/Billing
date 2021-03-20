@@ -1,0 +1,73 @@
+{% extends 'mainbase.html' %}
+
+{% block head %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/menu.css' %}">
+
+{% endblock head %}
+
+{% block title %}
+Menu
+{% endblock title %}
+
+{% block body %}
+<div class="row h-100" id="app">
+    <div class="col-md-3 px-3 py-3 bg-light">
+    </div>
+    <div class="col-md-6 px-3 py-3">
+        <div class="container mt-3">
+            <h4>Edit Item</h4>
+                <hr class="solid">
+            <b-card bg-variant="light" text-variant="black">
+                {% load crispy_forms_tags %}
+                <form method="post" enctype='multipart/form-data'>
+                    {% csrf_token %}
+                    {{ form.name | as_crispy_field }}
+                    {{ form.description | as_crispy_field }}
+                    {{ form.price | as_crispy_field }}
+                    <div v-if="image">
+                        <img :src="image" height="100" width="100">
+                    </div>
+                    {{ form.image | as_crispy_field }}
+                    <input type="number" name="menu" value="{{ menu_id }}" style="display: none; disabled: true;">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </form>
+
+            </b-card>
+        </div>
+    </div>
+    <div class="col-md-3 px-3 py-3 bg-light">
+
+    </div>
+</div>
+<script>
+    var app = new Vue({
+        delimiters: ['[[',']]'],
+        el: '#app',
+        data: function(){
+            return{
+                image: null,
+                url: "/api/v1/items/"
+            }
+        },
+        mounted: function() {
+            this.getItem()
+        },
+        methods: {
+            getItem: function(){
+                this.active = []
+                this.inactive = []
+                axios.get(this.url + {{ id }})
+                .then(response => {
+                    if (response.data.image){
+                        this.image = response.data.image
+                    }
+                })
+                .catch(function(error){
+                    console.log(error)
+                })
+            }
+        }
+    });
+</script>
+{% endblock body %}

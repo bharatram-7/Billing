@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from rest_framework import serializers
 from django.core.files.images import get_image_dimensions
 
 
