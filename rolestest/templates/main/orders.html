@@ -15,6 +15,7 @@ Menu
 
     </div>
     <div class="col">
+        <h4 class="my-3">View All Orders</h4>
     <template>
         <div>
             <b-table fixed hover :fields="fields" :items="orders" responsive="sm" class="text-center align-items-center"
@@ -61,17 +62,6 @@ Menu
 <script>
     Vue.component('rating', {
         props: ['rating'],
-        methods: {
-            deleteItem: function(){
-                axios.delete(this.$root.api_url + this.id)
-                .then(response => {
-                    this.$root.getMenu()
-                })
-                .catch(error => {
-                    console.log(error)
-                })
-            }
-        },
         template: '<b-form-rating id="rating-inline" inline value="rating"></b-form-rating>'
     });
 
@@ -80,7 +70,6 @@ Menu
         el: '#app',
         data: {
             fields: [
-                'index',
                 {key: 'id', label: 'Order ID', sortable: true},
                 {key: 'date', label: 'Date', sortable: true},
                 {key: 'total', label: 'Total', sortable: true},
@@ -89,7 +78,7 @@ Menu
             ],
             orders: [],
             baseURL: "{% url 'order' %}",
-            perPage: 14,
+            perPage: 10,
             currentPage: 1
 
         },
@@ -106,7 +95,6 @@ Menu
                 axios.get("{% url 'view_order' %}")
                 .then(response => {
                     this.orders = response.data
-                    console.log(this.orders)
                 })
                 .catch(function(error){
                     console.log(error)

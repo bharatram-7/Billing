@@ -167,7 +167,8 @@ var app = new Vue({
                     return
                 }
                 axios.put("{% url 'all_menus' %}" + {{ id }}, {
-                    name: this.menu_name_change
+                    name: this.menu_name_change,
+                    active: this.is_active
                 })
                 .then(response => {
                     alert("Update successful")

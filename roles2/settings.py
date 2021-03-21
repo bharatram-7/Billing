@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'django_filters',
     'rolestest.apps.RolestestConfig',
     'django.contrib.admin',
     'django.contrib.auth',

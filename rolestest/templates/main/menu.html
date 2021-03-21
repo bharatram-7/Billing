@@ -41,7 +41,7 @@ Menu
                             <inc-dec :id="item.id" :cartitemid="cartitems[item.id]" :quantity="itemquantity[item.id]"></inc-dec>
                         </div>
                         <div v-else>
-                            <inc-dec :id="item.id" :quantity="0"></inc-dec>
+                            <inc-dec :id="item.id" :quantity=0></inc-dec>
                         </div>
                     </div>
                   </div>
@@ -59,50 +59,39 @@ Menu
     props: ['cartitemid','id', 'quantity'],
     data: function(){
         return{
-            count: this.quantity
         }
     },
     mounted: function(){
-        this.initCounter()
     },
     methods: {
-        initCounter: function(){
-            if (this.$parent.itemquantity[id]){
-                this.count = this.$parent.itemquantity[id]
-            }
-        },
         increment: function(){
-            this.count++
             this.decider("i")
         },
         decrement: function(){
-            this.count--
             this.decider("d")
         },
         create: function(){
             axios.post("{% url 'view_cart_item' %}", {
                 item: this.id,
-                quantity: this.count
+                quantity: 1
             })
             .then(response => {
                 this.$parent.getcartitems()
             })
             .catch(function(error){
                 alert(error.data)
-                this.count--
             })
         },
-        update: function(){
+        update: function(value){
             axios.put("{% url 'view_cart_item' %}" + this.cartitemid, {
                 item: this.id,
-                quantity: this.count
+                quantity: value
             })
             .then(response =>{
                 this.$parent.getcartitems()
             })
             .catch(function(error){
                 alert(error.data)
-                this.count--
             })
         },
         delete: function(){
@@ -113,23 +102,23 @@ Menu
             })
             .catch(function(error){
                 console.log(error.data)
-                this.count++
             })
         },
         decider: function(typ){
-            if (this.count < 0){
-                this.count = 0
+            if (this.quantity == 0 && typ == "d"){
+                return
             }
-            else if (this.count == 1 && typ == "i"){
+            else if (this.quantity == 0 && typ == "i"){
                 this.create()
             }
-            else if ((this.count == 1 && typ == "d") || this.count > 1){
-                this.update()
-            }
-            else if (this.count == 0){
+            else if (this.quantity == 1 && typ == "d"){
                 this.delete()
             }
+            else if (typ == "d"){
+                this.update(this.quantity - 1)
+            }
             else{
+                this.update(this.quantity + 1)
             }
         }
     },
@@ -170,8 +159,8 @@ Menu
             axios.get("{% url 'view_cart_item' %}")
             .then(response => {
                 for (var cartitem of response.data){
-                    Vue.set(app.cartitems, cartitem.item, cartitem.id)
-                    Vue.set(app.itemquantity, cartitem.item, cartitem.quantity)
+                    Vue.set(this.cartitems, cartitem.item, cartitem.id)
+                    Vue.set(this.itemquantity, cartitem.item, cartitem.quantity)
                 }
             })
             .catch(function(error){

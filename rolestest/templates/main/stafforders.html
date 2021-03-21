@@ -3,16 +3,6 @@
 {% block head %}
 {% load static %}
 <link rel="stylesheet" href="{% static 'css/menu.css' %}">
-
-<style>
-    table{
-        counter-reset: Serial;
-    }
-    tr td:first-child:before{
-        counter-increment: Serial;
-        content: counter(Serial);
-    }
-</style>
 {% endblock head %}
 
 {% block title %}
@@ -23,26 +13,35 @@ Menu
 <div class="row h-100" id="app">
     <div class="col-md-2"></div>
     <div class="col">
-        <table class="table" id="orders-table">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Order No</th>
-                    <th scope="col">Total</th>
-                    <th scope="col">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="order in orders" v-if="order.status === 'P'">
-                        <td></td>
-                        <td><a :href="baseURL + order.id">Order #[[order.id]]</a></td>
-                        <td>[[order.total]]</td>
-                        <td><deliver :key="order.id" :order_id="order.id"></deliver></td>
-                </tr>
-            </tbody>
-        </table>
+        <h4 class="my-3">Manage Orders</h4>
+        <template>
+            <div>
+                <b-table fixed hover no-border :fields="fields" :items="orders" responsive="sm"
+                         class="text-center align-items-center"
+                         :per-page="perPage" :current-page="currentPage" responsive="sm">
+                    <template #cell(index)="data">
+                        [[ data.index + 1 ]]
+                    </template>
+
+                    <template #cell(id)="data">
+                        <a :href=" baseURL + data.item.id "> Order #[[ data.item.id ]]</a>
+                    </template>
+
+                    <template #cell(total)="data">
+                        ₹[[ data.item.total ]]
+                    </template>
+
+                    <template #cell(action)="data">
+                        <deliver :key="data.item.id" :order_id="data.item.id"></deliver>
+                    </template>
+                </b-table>
+                <b-pagination v-model="currentPage" :total-rows="rows" :per-page="perPage"></b-pagination>
+            </div>
+    </template>
     </div>
-    <div class="col-md-2"></div>
+    <div class="col-md-2">
+        Order Delivery
+    </div>
 </div>
 <script>
     axios.defaults.xsrfCookieName = 'csrftoken';
@@ -59,10 +58,10 @@ Menu
                 status: "D"
             })
             .then(response =>{
-                this.$parent.getOrder()
+                this.$root.getOrder()
             })
             .catch(function(error){
-                alert(error.data)
+                alert("Component error block")
             })
         }
     },
@@ -73,17 +72,37 @@ Menu
         delimiters: ['[[',']]'],
         el: '#app',
         data: {
+            fields: [
+                'index',
+                {key: 'id', label: 'Order ID', sortable: true},
+                {key: 'date', label: 'Date', sortable: true},
+                {key: 'total', label: 'Total', sortable: true},
+                {key: 'action', label: 'Action'}
+            ],
             orders: [],
-            baseURL: "{% url 'order' %}"
+            baseURL: "{% url 'order' %}",
+            perPage: 10,
+            currentPage: 1
+
+        },
+        computed:{
+            rows() {
+                return this.orders.length
+            }
         },
         mounted: function() {
             this.getOrder()
         },
         methods: {
             getOrder: function(){
+                this.orders = []
                 axios.get("{% url 'view_order' %}")
                 .then(response => {
-                    this.orders = response.data
+                    for (var order of response.data){
+                        if (order.status === 'P'){
+                            this.orders.push(order)
+                        }
+                    }
                 })
                 .catch(function(error){
                     console.log(error)

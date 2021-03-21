@@ -19,53 +19,52 @@
     <title>{% block title %}{% endblock title %}</title>
     <style>
         html, body {
-          height: 100%;
+          height: 100vh;
+          width: 100%;
           overflow-x: hidden;
+        }
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
     </style>
 </head>
 <body>
-    <header id="base">
-        <div>
-          <b-navbar toggleable="lg" type="dark" variant="info">
-            <b-navbar-brand href="#">NavBar</b-navbar-brand>
+      <b-navbar toggleable="lg" type="dark" variant="info" sticky id="base">
+        <b-navbar-brand href="/">Restocafe</b-navbar-brand>
 
-            <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
+        <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 
-            <b-collapse id="nav-collapse" is-nav>
-              <b-navbar-nav>
-                <b-nav-item href="#">Link</b-nav-item>
-                <b-nav-item href="#" disabled>Disabled</b-nav-item>
-              </b-navbar-nav>
+        <b-collapse id="nav-collapse" is-nav>
+          <b-navbar-nav>
+            <b-nav-item href="{% url 'menu' %}">Menu</b-nav-item>
+            <b-nav-item href="{% url 'checkout' %}">My Cart</b-nav-item>
+              {% if user.groups.all.0.name == 'Customers' %}
+            <b-nav-item href="{% url 'order' %}">My Orders</b-nav-item>
+              {% else %}
+              <b-nav-item-dropdown text="Manage Orders" right>
+                <b-dropdown-item href="{% url 'staff_orders' %}">Deliver</b-dropdown-item>
+                <b-dropdown-item href="{% url 'order' %}">View all Orders</b-dropdown-item>
+            </b-nav-item-dropdown>
+              {% endif %}
+          </b-navbar-nav>
 
-              <!-- Right aligned nav items -->
-              <b-navbar-nav class="ml-auto">
-                <b-nav-form>
-                  <b-form-input size="sm" class="mr-sm-2" placeholder="Search"></b-form-input>
-                  <b-button size="sm" class="my-2 my-sm-0" type="submit">Search</b-button>
-                </b-nav-form>
-
-                <b-nav-item-dropdown text="Lang" right>
-                  <b-dropdown-item href="#">EN</b-dropdown-item>
-                  <b-dropdown-item href="#">ES</b-dropdown-item>
-                  <b-dropdown-item href="#">RU</b-dropdown-item>
-                  <b-dropdown-item href="#">FA</b-dropdown-item>
-                </b-nav-item-dropdown>
-
-                <b-nav-item-dropdown right>
-                  <!-- Using 'button-content' slot -->
-                  <template #button-content>
-                    <em>User</em>
-                  </template>
-                  <b-dropdown-item href="#">Profile</b-dropdown-item>
-                  <b-dropdown-item href="#">Sign Out</b-dropdown-item>
-                </b-nav-item-dropdown>
-              </b-navbar-nav>
-            </b-collapse>
-          </b-navbar>
-        </div>
-    </header>
-    <div class="container-fluid">
+          <!-- Right aligned nav items -->
+          <b-navbar-nav class="ml-auto" right>
+              <b-nav-text class="pr-2">Hey, {{ user.name }} </b-nav-text>
+              {% if user.groups.all.0.name == 'Admin' %}
+            <b-nav-item-dropdown text="Admin" right>
+                <b-dropdown-item href="{% url 'view_all_menus' %}">Manage Menus</b-dropdown-item>
+                <b-dropdown-item href="{% url 'users' %}">Manage Users</b-dropdown-item>
+                <b-dropdown-item href="{% url 'reports' %}">Analytics</b-dropdown-item>
+            </b-nav-item-dropdown>
+              {% endif %}
+            <b-nav-item href="/logout">Sign Out</b-nav-item>
+          </b-navbar-nav>
+        </b-collapse>
+      </b-navbar>
+    <div class="container-fluid h-100">
 {% block body %}
 {% endblock body %}
     </div>
@@ -74,6 +73,11 @@
         delimiters: ['[[',']]'],
         el: '#base'
     });
+    var perfEntries = performance.getEntriesByType("navigation");
+
+    if (perfEntries[0].type === "back_forward") {
+        location.reload(true);
+    }
     </script>
 </body>
 </html>

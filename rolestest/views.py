@@ -16,6 +16,9 @@ from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_encode
 from .tokens import account_activation_token
 from django.template.loader import render_to_string
+
+from .filters import OrderFilter
+from django_filters import rest_framework as filters
 # Create your views here.
 
 
@@ -315,6 +318,27 @@ class ItemDetailView(LoginRequiredMixin, UserPassesTestMixin, View):
         except:
             return False
 
+
+class ReportsView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    template_name = 'main/reports.html'
+
+    def test_func(self):
+        try:
+            self.request.user.groups.get(name="Admin")
+            return True
+        except:
+            return False
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        customers = CustomUser.objects.filter(groups__name="Customers")
+        context['users'] = customers
+        return context
+
+    def get_queryset(self):
+        return
+
+
 # REST APIs from here
 
 
@@ -381,6 +405,8 @@ class ModifyCartItem(generics.RetrieveUpdateDestroyAPIView):
 class OrderList(generics.ListAPIView):
     serializer_class = OrderSerializer
     permission_classes = [permissions.IsAuthenticated, CustomDjangoModelPermissions]
+    filter_backends = (filters.DjangoFilterBackend, )
+    filterset_class = OrderFilter
 
     def get_queryset(self):
         group = self.request.user.groups.filter(user=self.request.user)[0]

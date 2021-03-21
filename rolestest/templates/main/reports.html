@@ -1,0 +1,220 @@
+{% extends 'mainbase.html' %}
+
+{% block head %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/menu.css' %}">
+{% endblock head %}
+
+{% block title %}
+Menu
+{% endblock title %}
+
+{% block body %}
+<div class="row h-100" id="app">
+    <div class="col-md-1"></div>
+    <div class="col-md-7 mt-3">
+        <b-alert v-model="showDismissibleAlert" variant="danger" dismissible>
+            1) Either a date is not selected
+            2) Or Please pick a start date that's lesser than the end date
+        </b-alert>
+        <b-card>
+            <h4 class="mb-3 text-center">Analyse Trends</h4>
+            <template>
+                <div>
+                    <b-table fixed hover :fields="fields" :items="orders" responsive="sm" class="text-center align-items-center"
+                             :per-page="perPage" :current-page="currentPage" responsive="sm">
+                        <template #cell(index)="data">
+                            [[ data.index + 1 ]]
+                        </template>
+
+                        <template #cell(id)="data">
+                            <a :href=" baseURL + data.item.id "> Order #[[ data.item.id ]]</a>
+                        </template>
+                        <template #cell(total)="data">
+                            ₹[[ data.item.total ]]
+                        </template>
+                        <template #cell(status)="data">
+                            <div v-if="data.item.status === 'P'">Pending</div>
+                            <div v-if="data.item.status === 'D'">Delivered</div>
+                        </template>
+
+                        <template #cell(rating)="data">
+                            <div v-if="data.item.status === 'D'">
+                                <div v-if="data.item.rating">
+                                    <b-form-rating id="rating-inline" variant="warning" no-border
+                                                   readonly inline :value="data.item.rating"></b-form-rating>
+                                </div>
+                                <div v-else>
+                                    <button class="btn btn-secondary">N/A</button>
+                                </div>
+                            </div>
+                            <div v-else>
+                                <button class="btn btn-secondary">N/A</button>
+                            </div>
+                        </template>
+                    </b-table>
+                    <b-pagination v-model="currentPage" :total-rows="rows" :per-page="perPage"></b-pagination>
+                </div>
+            </template>
+        </b-card>
+    </div>
+    <div class="col-md-3">
+        <b-card class="mt-3">
+            <h4>Filters</h4>
+            <hr class="solid">
+            <template>
+                <b-form>
+                    <div>
+                        <label for="startdate">Start Date</label>
+                        <b-form-datepicker id="startdate" v-model="start_date" class="mb-2"></b-form-datepicker>
+                    </div>
+                    <div>
+                        <label for="enddate">End date</label>
+                        <b-form-datepicker id="enddate" v-model="end_date" class="mb-2"></b-form-datepicker>
+                    </div>
+                    <div class="form-group">
+                        <label for="customer">Customer</label>
+                        <select v-model="user_id" class="form-control" id="customer">
+                            <option value="all" selected>All</option>
+                            {% for user in users %}
+                                <option value="{{ user.id }}">{{ user.email }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button @click.stop.prevent="getFiltered()" class="btn btn-primary btn-block">Filter</button>
+                </b-form>
+            </template>
+    </b-card>
+        <b-card class="text-center mt-1 mb-1">
+            <h4>Total Sales</h4>
+            <hr class="solid">
+            <b-card-text>
+                ₹[[ total_sales ]]
+            </b-card-text>
+        </b-card>
+        <b-card class="text-center mb-1">
+            <h4>Delivered Orders</h4>
+            <hr class="solid">
+            <b-card-text>
+                [[ delivered ]]/[[ orders.length ]]
+            </b-card-text>
+        </b-card>
+        <b-card class="text-center mb-1">
+            <h4>CSAT Ratings</h4>
+            <hr class="solid">
+            <b-card-text>
+                [[ ratings ]]
+            </b-card-text>
+        </b-card>
+        <b-card class="text-center mb-1">
+            <h4>5 Stars</h4>
+            <hr class="solid">
+            <b-card-text>
+                [[ five_stars ]]
+            </b-card-text>
+        </b-card>
+    </div>
+    <div class="col-md-1"></div>
+</div>
+
+<script>
+    Vue.component('rating', {
+        props: ['rating'],
+        methods: {
+            deleteItem: function(){
+                axios.delete(this.$root.api_url + this.id)
+                .then(response => {
+                    this.$root.getMenu()
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+            }
+        },
+        template: '<b-form-rating id="rating-inline" inline value="rating"></b-form-rating>'
+    });
+
+
+    var app = new Vue({
+        delimiters: ['[[',']]'],
+        el: '#app',
+        data: {
+            fields: [
+                'index',
+                {key: 'id', label: 'Order ID', sortable: true},
+                {key: 'date', label: 'Date', sortable: true},
+                {key: 'total', label: 'Total', sortable: true},
+                {key: 'status', label: 'Status', sortable: true},
+                {key: 'rating', label: 'Rating'}
+            ],
+            orders: [],
+            baseURL: "{% url 'order' %}",
+            perPage: 10,
+            currentPage: 1,
+            user_id: 'all',
+            start_date: null,
+            end_date: null,
+            showDismissibleAlert: false,
+            five_stars: 0,
+            delivered: 0,
+            ratings: 0,
+            total_sales: 0.0
+        },
+        computed:{
+            rows() {
+                return this.orders.length
+            }
+        },
+        mounted: function() {
+            this.getOrders()
+        },
+        methods: {
+            getCsatInfo: function(){
+                this.total_sales = 0
+                this.five_stars = 0
+                this.ratings = 0
+                this. delivered = 0
+                for (var order of this.orders){
+                    if (order.status === 'D'){
+                        this.delivered++
+                    }
+                    if (order.rating == 5){
+                        this.five_stars++
+                        this.ratings++
+                    }else if(order.rating){
+                        this.ratings++
+                    }
+                    this.total_sales = parseFloat(order.total) + this.total_sales
+                }
+            },
+            getOrders: function(req_url){
+                if(!req_url){
+                    req_url = "{% url 'view_order' %}"
+                }
+                axios.get(req_url)
+                .then(response => {
+                    this.orders = response.data
+                    this.getCsatInfo()
+                })
+                .catch(function(error){
+                    console.log(error)
+                })
+            },
+            getFiltered: function(){
+                query = ''
+                if(this.end_date < this.start_date || this.end_date == null || this.end_date == null){
+                    this.showDismissibleAlert = true
+                    return
+                }
+                else{
+                    query = '?min_date=' + this.start_date + '+00%3A00%3A00&max_date=' + this.end_date + '+23%3A59%3A59'
+                }
+                if (this.user_id != "all"){
+                    query = query + '&user=' + this.user_id
+                }
+                this.getOrders("{% url 'view_order' %}" + query)
+            }
+        }
+    });
+</script>
+{% endblock body %}

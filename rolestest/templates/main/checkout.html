@@ -67,7 +67,6 @@ Menu
     props: ['cartitemid','id', 'quantity'],
     data: function(){
         return{
-            count: this.quantity
         }
     },
     mounted: function(){
@@ -75,24 +74,21 @@ Menu
     },
     methods: {
         increment: function(){
-            this.count++
             this.decider("i")
         },
         decrement: function(){
-            this.count--
             this.decider("d")
         },
-        update: function(){
+        update: function(value){
             axios.put("{% url 'view_cart_item' %}" + this.cartitemid, {
                 item: this.id,
-                quantity: this.count
+                quantity: value
             })
             .then(response =>{
                 this.$parent.getcartitems()
             })
             .catch(function(error){
                 alert(error)
-                this.count--
             })
         },
         deleteCartItem: function(){
@@ -105,17 +101,14 @@ Menu
             })
         },
         decider: function(typ){
-            if (this.count < 0){
-                this.count = 0
-            }
-            else if(this.count == 0){
+            if (this.quantity == 1 && typ == 'd'){
                 this.deleteCartItem()
             }
             else if (typ == "i"){
-                this.update()
+                this.update(this.quantity + 1)
             }
             else if (typ == "d"){
-                this.update()
+                this.update(this.quantity - 1)
             }
         }
     },

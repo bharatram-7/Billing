@@ -23,6 +23,23 @@ class MenuWithItemsSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['items']
 
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name')
+        instance.active = validated_data.get('active')
+        instance.save()
+        try:
+            if not instance.active:
+                items = Item.objects.filter(menu__id=instance.id)
+                for item in items:
+                    print(item.name)
+                    cart_items = CartItem.objects.filter(item=item)
+                    if cart_items:
+                        for cart_item in cart_items:
+                            cart_item.delete()
+            return instance
+        except:
+            return instance
+
 
 class MenuSerializer(serializers.ModelSerializer):
 
@@ -43,6 +60,7 @@ class CreateCartSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault()
     )
+    quantity = serializers.IntegerField(min_value=0, max_value=100)
 
     class Meta:
         model = CartItem
@@ -88,18 +106,34 @@ class OrderWithItemsSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         purchased_items = validated_data.pop('purchased_items')
         order = Order.objects.create(**validated_data)
-        items = []
-        for item in Item.objects.only('name'):
-            items.append(item.name)
+        # items = []
+        # for item in Item.objects.only('name'):
+        #     items.append(item.name)
+        # try:
+        #     for item in purchased_items:
+        #         if item["item"] in items:
+        #             item["order"] = order
+        #             PurchasedItem.objects.create(**item)
+        #     return order
+        # except Exception as e:
+        #     order.delete()
+        #     return
+
+        items = {}
+        active_menus = Menu.objects.filter(active=True)
+        for menu in active_menus:
+            active_items = Item.objects.filter(menu__id=menu.id)
+            for item in active_items:
+                items[item.name] = item.price
+        print(items)
         try:
             for item in purchased_items:
-                if item["item"] in items:
+                if items[item["item"]] == item["price"]:
                     item["order"] = order
                     PurchasedItem.objects.create(**item)
             return order
-        except Exception as e:
-            order.delete()
-            return
+        except:
+            raise serializers.ValidationError("Invalid items")
 
     def validate(self, data):
         """
@@ -111,15 +145,16 @@ class OrderWithItemsSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    user = serializers.HiddenField(
-        default=serializers.CurrentUserDefault()
+    user = serializers.CharField(
+        default=serializers.CurrentUserDefault(),
+        read_only=True
     )
-    date = serializers.DateTimeField(format='%Y-%m-%d %H:%M')
+    date = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
 
     class Meta:
         model = Order
         fields = '__all__'
-        read_only_fields = ['date', 'total', 'rating']
+        read_only_fields = ['date', 'total', 'rating', 'user']
 
 
 class OrderRatingSerializer(serializers.ModelSerializer):
