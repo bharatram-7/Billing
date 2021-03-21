@@ -24,7 +24,7 @@ Menu
 {% block body %}
 <div class="row h-100" id="app">
     <div class="col-md-2"></div>
-    <div class="col">
+    <div class="col-md-8">
         <table class="table text-center">
             <thead>
                 <tr>
@@ -57,6 +57,7 @@ Menu
             </tbody>
         </table>
         <button type="button" @click="order()" class="btn btn-success">Checkout</button>
+        </div>
     </div>
     <div class="col-md-2"></div>
 </div>
@@ -113,22 +114,10 @@ Menu
         }
     },
     template: `
-<!--    <div class="input-group quantity">-->
-<!--   <div class="input-group-prepend decrement-btn" style="cursor: pointer">-->
-<!--            <span v-on:click="decrement()" class="input-group-text">-</span>-->
-<!--        </div>-->
-<!--        <div class="col-xs-3">-->
-<!--        <input type="text" style="width:50px" class="qty-input form-control text-center" min="0" max="10"-->
-<!--                v-bind:value="quantity">-->
-<!--        </div>-->
-<!--        <div v-on:click="increment()" class="input-group-append increment-btn" style="cursor: pointer">-->
-<!--            <span class="input-group-text">+</span>-->
-<!--        </div>-->
-<!--            </div>-->
     <div>
     <b-button-group>
       <b-button v-on:click="decrement()">-</b-button>
-      <input type="button" class="btn border" :value="quantity">
+      <input type="button" class="btn btn-secondary" :value="quantity">
       <b-button v-on:click="increment()">+</b-button>
     </b-button-group>
 

@@ -1,7 +1,7 @@
-{% extends 'base.html' %}
+{% extends 'mainbase.html' %}
 {% block head %}
 {% load static %}
-<link rel="stylesheet" href="{% static 'css/signup.css' %}">
+<link rel="stylesheet" href="{% static 'css/menu.css' %}">
 {% endblock head %}
 {% block title %}
 Signup
@@ -9,18 +9,33 @@ Signup
 
 {% block body %}
 {% load crispy_forms_tags %}
-<section class="container-fluid">
-    <section class="row justify-content-center">
-        <section class="col-md-3 col-12 col-sm-6">
-            <section class="form-container">
-                <h2>Sign up!</h2>
-                <form method="post">
-                    {% csrf_token %}
-                    {{ form|crispy }}
-                    <button type="submit" class="btn btn-primary">Signup</button>
-                </form>
-            </section>
-        </section>
-    </section>
-</section>
+
+<div class="row h-100" id="app">
+    <div class="col-md-2"></div>
+    <div class="col">
+        <h2 class="my-3">Add User</h2>
+        <hr class="solid">
+        <form method="post">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" class="btn btn-primary">Create</button>
+        </form>
+    </div>
+    <div class="col-md-2">
+    </div>
+</div>
+<!--<section class="container-fluid">-->
+<!--    <section class="row justify-content-center">-->
+<!--        <section class="col-md-3 col-12 col-sm-6">-->
+<!--            <section class="form-container">-->
+<!--                <h2>Sign up!</h2>-->
+<!--                <form method="post">-->
+<!--                    {% csrf_token %}-->
+<!--                    {{ form|crispy }}-->
+<!--                    <button type="submit" class="btn btn-primary">Signup</button>-->
+<!--                </form>-->
+<!--            </section>-->
+<!--        </section>-->
+<!--    </section>-->
+<!--</section>-->
 {% endblock body %}
