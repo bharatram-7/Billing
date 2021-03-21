@@ -18,10 +18,10 @@ Menu
             <h5>Menu Details</h5>
             <hr class="solid">
             <b-card bg-variant="light" text-variant="black" :title="menu_data.name">
-              <b-card-text>
-                Wanna edit the name?
-              </b-card-text>
-              <b-button href="#" v-b-modal.update variant="primary">Change Name</b-button>
+                <b-card-text>
+                    Would you like to edit the name?
+                </b-card-text>
+              <b-button href="#" v-b-modal.update variant="primary">Edit</b-button>
               <b-button @click="toggle()" v-if="is_active" href="#" variant="danger">Deactivate</b-button>
               <b-button @click="toggle()" v-else href="#" variant="success">Activate</b-button>
               <b-modal id="update"
@@ -60,7 +60,7 @@ Menu
                     {% csrf_token %}
                     {{ form|crispy }}
                     <input type="number" name="menu" value="{{ id }}" style="display: none; disabled: true;">
-                    <button type="submit" class="btn btn-primary">Create</button>
+                    <button type="submit" class="btn btn-success">Add</button>
                 </form>
             </b-card>
         </div>

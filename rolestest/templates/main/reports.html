@@ -11,14 +11,41 @@ Menu
 
 {% block body %}
 <div class="row h-100" id="app">
-    <div class="col-md-1"></div>
-    <div class="col-md-7 mt-3">
+    <div class="col-md-3">
+        <b-card class="mt-3">
+            <h3 class="text-center">Filters</h3>
+            <hr class="solid">
+            <template>
+                <b-form>
+                    <div>
+                        <label for="startdate">Start Date</label>
+                        <b-form-datepicker id="startdate" v-model="start_date" class="mb-2"></b-form-datepicker>
+                    </div>
+                    <div>
+                        <label for="enddate">End date</label>
+                        <b-form-datepicker id="enddate" v-model="end_date" class="mb-2"></b-form-datepicker>
+                    </div>
+                    <div class="form-group">
+                        <label for="customer">Customer</label>
+                        <select v-model="user_id" class="form-control" id="customer">
+                            <option value="all" selected>All</option>
+                            {% for user in users %}
+                                <option value="{{ user.id }}">{{ user.email }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button @click.stop.prevent="getFiltered()" class="btn btn-primary btn-block">Filter</button>
+                </b-form>
+            </template>
+        </b-card>
+    </div>
+    <div class="col-md-6 mt-3">
         <b-alert v-model="showDismissibleAlert" variant="danger" dismissible>
             1) Either a date is not selected
             2) Or Please pick a start date that's lesser than the end date
         </b-alert>
         <b-card>
-            <h4 class="mb-3 text-center">Analyse Trends</h4>
+            <h2 class="mb-3 text-center">Analyse Trends</h2>
             <template>
                 <div>
                     <b-table fixed hover :fields="fields" :items="orders" responsive="sm" class="text-center align-items-center"
@@ -60,61 +87,38 @@ Menu
     </div>
     <div class="col-md-3">
         <b-card class="mt-3">
-            <h4>Filters</h4>
+            <h3 class="text-center">Stats</h3>
             <hr class="solid">
-            <template>
-                <b-form>
-                    <div>
-                        <label for="startdate">Start Date</label>
-                        <b-form-datepicker id="startdate" v-model="start_date" class="mb-2"></b-form-datepicker>
-                    </div>
-                    <div>
-                        <label for="enddate">End date</label>
-                        <b-form-datepicker id="enddate" v-model="end_date" class="mb-2"></b-form-datepicker>
-                    </div>
-                    <div class="form-group">
-                        <label for="customer">Customer</label>
-                        <select v-model="user_id" class="form-control" id="customer">
-                            <option value="all" selected>All</option>
-                            {% for user in users %}
-                                <option value="{{ user.id }}">{{ user.email }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <button @click.stop.prevent="getFiltered()" class="btn btn-primary btn-block">Filter</button>
-                </b-form>
-            </template>
-    </b-card>
-        <b-card class="text-center mt-1 mb-1">
-            <h4>Total Sales</h4>
-            <hr class="solid">
-            <b-card-text>
-                ₹[[ total_sales ]]
-            </b-card-text>
-        </b-card>
-        <b-card class="text-center mb-1">
-            <h4>Delivered Orders</h4>
-            <hr class="solid">
-            <b-card-text>
-                [[ delivered ]]/[[ orders.length ]]
-            </b-card-text>
-        </b-card>
-        <b-card class="text-center mb-1">
-            <h4>CSAT Ratings</h4>
-            <hr class="solid">
-            <b-card-text>
-                [[ ratings ]]
-            </b-card-text>
-        </b-card>
-        <b-card class="text-center mb-1">
-            <h4>5 Stars</h4>
-            <hr class="solid">
-            <b-card-text>
-                [[ five_stars ]]
-            </b-card-text>
+            <b-card class="text-center mt-1 mb-1">
+                <h4>Total Sales</h4>
+                <hr class="solid">
+                <b-card-text>
+                    ₹[[ total_sales ]]
+                </b-card-text>
+            </b-card>
+            <b-card class="text-center mb-1">
+                <h4>Delivered Orders</h4>
+                <hr class="solid">
+                <b-card-text>
+                    [[ delivered ]]/[[ orders.length ]]
+                </b-card-text>
+            </b-card>
+            <b-card class="text-center mb-1">
+                <h4>CSAT Ratings</h4>
+                <hr class="solid">
+                <b-card-text>
+                    [[ ratings ]]
+                </b-card-text>
+            </b-card>
+            <b-card class="text-center mb-1">
+                <h4>5 Stars</h4>
+                <hr class="solid">
+                <b-card-text>
+                    [[ five_stars ]]
+                </b-card-text>
+            </b-card>
         </b-card>
     </div>
-    <div class="col-md-1"></div>
 </div>
 
 <script>
@@ -202,7 +206,7 @@ Menu
             },
             getFiltered: function(){
                 query = ''
-                if(this.end_date < this.start_date || this.end_date == null || this.end_date == null){
+                if(this.end_date < this.start_date || this.start_date == null || this.end_date == null){
                     this.showDismissibleAlert = true
                     return
                 }

@@ -13,8 +13,21 @@ urlpatterns = [
     path('activation/sent', views.activation_sent_view, name='activation_email_sent'),
     path('activation/<slug:uidb64>/<slug:token>/', views.activate, name='activate'),
     path('login/', auth_views.LoginView.as_view(template_name="authentication/login.html",
-                                                         authentication_form=UserLoginForm,
-                                                         redirect_authenticated_user=True), name='login'),
+         authentication_form=UserLoginForm,
+         redirect_authenticated_user=True), name='login'),
+    path('forgot_password/', auth_views.PasswordResetView.as_view(
+        template_name="authentication/forgot_password.html",
+        success_url=reverse_lazy('forgot_password_success'),
+        email_template_name="authentication/password_reset_template.html"),
+        name='forgot_password'),
+    path('forgot_password/success/', auth_views.PasswordResetDoneView.as_view(
+        template_name='authentication/forgot_password_success.html'),
+        name='forgot_password_success'),
+    path('password_reset_confirm/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(
+        template_name="authentication/password_reset_confirmation.html",
+        success_url=reverse_lazy('password_reset_completed')), name='password_reset_confirm'),
+    path('accounts/password_reset_completed/', auth_views.PasswordResetCompleteView.as_view(
+        template_name="authentication/password_reset_completion.html"), name='password_reset_completed'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('menu/', ActiveMenuList.as_view(), name='menu'),
     path('checkout/', Checkout.as_view(), name='checkout'),

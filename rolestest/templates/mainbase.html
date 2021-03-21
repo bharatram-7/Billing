@@ -31,7 +31,7 @@
     </style>
 </head>
 <body>
-      <b-navbar toggleable="lg" type="dark" variant="info" sticky id="base">
+      <b-navbar toggleable="lg" type="dark" variant="info" fixed id="base">
         <b-navbar-brand href="/">Restocafe</b-navbar-brand>
 
         <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
@@ -57,7 +57,7 @@
             <b-nav-item-dropdown text="Admin" right>
                 <b-dropdown-item href="{% url 'view_all_menus' %}">Manage Menus</b-dropdown-item>
                 <b-dropdown-item href="{% url 'users' %}">Manage Users</b-dropdown-item>
-                <b-dropdown-item href="{% url 'reports' %}">Analytics</b-dropdown-item>
+                <b-dropdown-item href="{% url 'reports' %}">Reports</b-dropdown-item>
             </b-nav-item-dropdown>
               {% endif %}
             <b-nav-item href="/logout">Sign Out</b-nav-item>
