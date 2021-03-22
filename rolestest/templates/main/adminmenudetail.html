@@ -22,8 +22,8 @@ Menu
                     Would you like to edit the name?
                 </b-card-text>
               <b-button href="#" v-b-modal.update variant="primary">Edit</b-button>
-              <b-button @click="toggle()" v-if="is_active" href="#" variant="danger">Deactivate</b-button>
-              <b-button @click="toggle()" v-else href="#" variant="success">Activate</b-button>
+              <b-button @click="toggleConfirmation()" v-if="is_active" href="#" variant="danger">Deactivate</b-button>
+              <b-button @click="toggleConfirmation()" v-else href="#" variant="success">Activate</b-button>
               <b-modal id="update"
                      title="Change Menu Name"
                      @show="resetModal"
@@ -60,16 +60,15 @@ Menu
                     {% csrf_token %}
                     {{ form|crispy }}
                     <input type="number" name="menu" value="{{ id }}" style="display: none; disabled: true;">
-                    <button type="submit" class="btn btn-success">Add</button>
+                        <button type="submit" class="btn btn-success btn-block">Add</button>
                 </form>
             </b-card>
         </div>
     </div>
-    <div class="col-md-5 px-3 py-3">
+    <div class="col-md-6 px-3 py-3">
         <div class="container-fluid" id="menu-item-container">
             <h5>Menu Items</h5>
             <hr class="solid">
-
             <b-card v-for="item in menu_data.items" class="mb-3">
                 <div class="row">
                     <div class="col-md-9">
@@ -97,7 +96,36 @@ axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
 
 Vue.component('trash', {
         props: ['id'],
+        data: function(){
+            return{
+                confirmDelete: ''
+            }
+        },
         methods: {
+            deleteConfirmation() {
+                this.confirmDelete = ''
+                this.$bvModal.msgBoxConfirm('Please confirm that you want to delete this item', {
+                    title: 'Delete Confirm',
+                    size: 'md',
+                    buttonSize: 'md',
+                    okVariant: 'danger',
+                    okTitle: 'Delete',
+                    cancelTitle: 'No! This was by mistake',
+                    cancelVariant: 'success',
+                    footerClass: 'p-2',
+                    hideHeaderClose: false,
+                    centered: true
+                })
+                .then(value => {
+                    this.confirmDelete = value
+                    if (this.confirmDelete == true){
+                        this.deleteItem()
+                    }
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+            },
             deleteItem: function(){
                 axios.delete(this.$root.api_url + this.id)
                 .then(response => {
@@ -106,9 +134,9 @@ Vue.component('trash', {
                 .catch(error => {
                     console.log(error)
                 })
-            }
+          }
         },
-        template: '<button @click="deleteItem" class="btn btn-danger my-2">Delete</button>'
+        template: '<button @click="deleteConfirmation()" class="btn btn-danger my-2">Delete</button>'
     });
 
 var app = new Vue({
@@ -121,13 +149,42 @@ var app = new Vue({
                 name_state: null,
                 is_active: null,
                 menu_data: null,
-                api_url: "/api/v1/items/"
+                api_url: "/api/v1/items/",
+                toggle_confirm: ''
             }
         },
         mounted: function() {
             this.getMenu()
         },
         methods: {
+            toggleConfirmation() {
+                if(this.is_active != true){
+                    this.toggle()
+                    return
+                }
+                this.toggle_confirm = ''
+                this.$bvModal.msgBoxConfirm("Deactivating a menu will delete the menu's items from all user's cart. Please confirm to proceed", {
+                    title: 'Confirmation',
+                    size: 'md',
+                    buttonSize: 'md',
+                    okVariant: 'danger',
+                    okTitle: 'Proceed',
+                    cancelTitle: "No! Let's keep it active",
+                    cancelVariant: 'success',
+                    footerClass: 'p-2',
+                    hideHeaderClose: false,
+                    centered: true
+                })
+                .then(value => {
+                    this.toggle_confirm = value
+                    if (this.toggle_confirm == true){
+                        this.toggle()
+                    }
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+            },
             toggle: function(){
                 value = !this.is_active
                 axios.put("{% url 'all_menus' %}" + {{ id }}, {

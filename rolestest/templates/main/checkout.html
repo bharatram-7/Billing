@@ -24,7 +24,11 @@ Menu
 {% block body %}
 <div class="row h-100" id="app">
     <div class="col-md-2"></div>
-    <div class="col-md-8">
+    <div class="col-md-8 mt-3">
+        <b-alert class="text-center" v-model="showDismissibleAlert" variant="danger" dismissible>
+          [[ message ]]
+        </b-alert>
+        <h3 class="text-center mb-3">Manage your Cart</h3>
         <table class="table text-center">
             <thead>
                 <tr>
@@ -39,20 +43,20 @@ Menu
                 <tr v-for="cartitem in cart">
                     <td></td>
                     <td>[[cartitem.item.name]]</td>
-                    <td>[[cartitem.item.price]]</td>
+                    <td>₹[[cartitem.item.price]]</td>
                     <td>
                         <inc-dec class="text-center" :id="cartitem.item.id" :cartitemid="cartitem.id" :quantity="cartitem.quantity"
                              :key="cartitem.id">
                         </inc-dec>
                     </td>
-                    <td>[[ itemtotal[cartitem.item.id] ]]</td>
+                    <td>₹[[ itemtotal[cartitem.item.id] ]]</td>
                 </tr>
                 <tr>
                     <th></th>
                     <td></td>
                     <td></td>
                     <th>Total</th>
-                    <td>[[ carttotal ]]</td>
+                    <td>₹[[ carttotal ]]</td>
                 </tr>
             </tbody>
         </table>
@@ -139,7 +143,9 @@ Menu
         data: {
             cart: [],
             itemtotal: {},
-            carttotal: 0
+            carttotal: 0,
+            showDismissibleAlert: false,
+            message: ''
         },
         mounted: function() {
             this.getcartitems()
@@ -177,16 +183,25 @@ Menu
                 }
                 axios.post("{% url 'create_order' %}", payload)
                 .then(response =>{
-                    alert("Success! Your order was successfully placed")
+                    window.location.href = "{% url 'order' %}" + response.data.id
                 })
-                .catch(function(error){
+                .catch(error => {
                     console.log(error)
-                    if (error.data.detail){
-                        alert(error.data.detail)
-                    }else if (error.data.non_field_errors){
-                        alert(error.data.non_field_errors)
+                    if (error.data.non_field_errors){
+                        this.message = ''
+                        for (var e_message of error.data.non_field_errors){
+                            this.message += e_message + ' '
+                        }
+                        this.showDismissibleAlert = true
+                    }else if (error.data){
+                        this.message = ''
+                        for (var e_message of error.data){
+                            this.message += e_message + ' '
+                        }
+                        this.showDismissibleAlert = true
                     }else{
-                        alert(error.status + ' ' + error.statusText)
+                        this.message = error.status + ' ' + error.statusText
+                        this.showDismissibleAlert = true
                     }
                 })
             }

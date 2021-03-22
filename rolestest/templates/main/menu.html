@@ -12,18 +12,18 @@ Menu
 {% block body %}
 <div class="row h-100" id="app">
     <div class="col-md-3"></div>
-    <div class="col-md-6 h-100 card mt-3 px-3 py-3">
+    <div class="col-md-6 h-100 mt-1 px-3 py-3">
         <div v-for="menu in menus">
             <h3 :id="menu.name">[[ menu.name ]]</h3>
             <hr class="solid">
             <b-card v-for="item in menu.items" :key="item.id" class="mb-3">
                 <div class="row">
                     <div class="col-md-9">
-                        <b-img class="mr-3" v-if="item.image" left :src="item.image" alt="No image found" width="140px" height="140px"></b-img>
-                        <b-img class="mr-3" v-else left src="{% static 'img/no-image.jpg' %}" alt="No image found" width="140px" height="140px"></b-img>
-                        <b-card-text><h5>[[ item.name ]]</h5></b-card-text>
-                        <b-card-text>₹[[ item.price ]]</b-card-text>
-                        <b-card-text>[[ item.description ]]</b-card-text>
+                        <b-img class="mr-3" v-if="item.image" left :src="item.image" alt="No image found" width="120px" height="120px"></b-img>
+                        <b-img class="mr-3" v-else left src="{% static 'img/no-image.jpg' %}" alt="No image found" width="120px" height="120px"></b-img>
+                        <b-card-text class="md-1"><h5 class="md-1">[[ item.name ]]</h5></b-card-text>
+                        <b-card-text class="md-1">₹[[ item.price ]]</b-card-text>
+                        <b-card-text class="md-1">[[ item.description ]]</b-card-text>
                     </div>
                     <div class="col-md-3 d-flex flex-column justify-content-center align-items-end">
                         <div v-if="cartitems[item.id]">

@@ -4,10 +4,11 @@
 <div class="container">
     <div class="row">
         <div class="col-md-2"></div>
-        <div class="col-md-8" id="app">
+        <div class="col-md-8 card mx-2 my-2 py-3" id="app">
             <template>
                 <div>
                     <h2> Edit User </h2>
+                    <hr class="solid">
                     <b-form @submit="editUser">
                         <b-form-group label="Name" id="name-group"
                                       label-for="name" v-model="user_data.name">

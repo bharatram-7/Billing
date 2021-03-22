@@ -43,24 +43,24 @@
 
           <!-- Right aligned nav items -->
           <b-navbar-nav class="ml-auto" right>
-              <b-nav-item href="{% url 'menu' %}">Menu</b-nav-item>
-              <b-nav-item href="{% url 'checkout' %}">My Cart</b-nav-item>
+              <b-nav-item class="mx-3" href="{% url 'menu' %}">Menu</b-nav-item>
+              <b-nav-item class="mx-3" href="{% url 'checkout' %}">My Cart</b-nav-item>
               {% if user.groups.all.0.name == 'Customers' %}
-              <b-nav-item href="{% url 'order' %}">My Orders</b-nav-item>
+              <b-nav-item class="mx-3" href="{% url 'order' %}">My Orders</b-nav-item>
               {% else %}
-              <b-nav-item-dropdown text="Manage Orders" right>
-                <b-dropdown-item href="{% url 'staff_orders' %}">Deliver</b-dropdown-item>
+              <b-nav-item-dropdown class="mx-3" text="Manage Orders" right>
+                <b-dropdown-item href="{% url 'staff_orders' %}">Manage Orders</b-dropdown-item>
                 <b-dropdown-item href="{% url 'order' %}">View all Orders</b-dropdown-item>
               </b-nav-item-dropdown>
               {% endif %}
               {% if user.groups.all.0.name == 'Admin' %}
-              <b-nav-item-dropdown text="Admin" right>
-                <b-dropdown-item href="{% url 'view_all_menus' %}">Manage Menus</b-dropdown-item>
-                <b-dropdown-item href="{% url 'users' %}">Manage Users</b-dropdown-item>
-                <b-dropdown-item href="{% url 'reports' %}">Reports</b-dropdown-item>
+              <b-nav-item-dropdown class="mx-3" text="Admin" right>
+                <b-dropdown-item href="{% url 'view_all_menus' %}">Menus</b-dropdown-item>
+                <b-dropdown-item href="{% url 'users' %}">Users</b-dropdown-item>
+                <b-dropdown-item href="{% url 'insights' %}">Insights</b-dropdown-item>
               </b-nav-item-dropdown>
               {% endif %}
-            <b-nav-item href="/logout">Sign Out</b-nav-item>
+            <b-nav-item class="mx-3" href="/logout">Sign Out</b-nav-item>
           </b-navbar-nav>
         </b-collapse>
       </b-navbar>

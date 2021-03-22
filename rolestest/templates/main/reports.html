@@ -45,7 +45,7 @@ Menu
             2) Or Please pick a start date that's lesser than the end date
         </b-alert>
         <b-card>
-            <h2 class="mb-3 text-center">Analyse Trends</h2>
+            <h2 class="mb-3 text-center">Sales Insights</h2>
             <template>
                 <div>
                     <b-table fixed hover :fields="fields" :items="orders" responsive="sm" class="text-center align-items-center"
@@ -90,28 +90,28 @@ Menu
             <h3 class="text-center">Stats</h3>
             <hr class="solid">
             <b-card class="text-center mt-1 mb-1">
-                <h4>Total Sales</h4>
+                <h5>Total Sales</h5>
                 <hr class="solid">
                 <b-card-text>
                     ₹[[ total_sales ]]
                 </b-card-text>
             </b-card>
             <b-card class="text-center mb-1">
-                <h4>Delivered Orders</h4>
+                <h5>Delivered Orders</h5>
                 <hr class="solid">
                 <b-card-text>
                     [[ delivered ]]/[[ orders.length ]]
                 </b-card-text>
             </b-card>
             <b-card class="text-center mb-1">
-                <h4>CSAT Ratings</h4>
+                <h5>CSAT Ratings</h5>
                 <hr class="solid">
                 <b-card-text>
                     [[ ratings ]]
                 </b-card-text>
             </b-card>
             <b-card class="text-center mb-1">
-                <h4>5 Stars</h4>
+                <h5>5 Stars</h5>
                 <hr class="solid">
                 <b-card-text>
                     [[ five_stars ]]

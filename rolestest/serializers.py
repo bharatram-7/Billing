@@ -106,34 +106,24 @@ class OrderWithItemsSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         purchased_items = validated_data.pop('purchased_items')
         order = Order.objects.create(**validated_data)
-        # items = []
-        # for item in Item.objects.only('name'):
-        #     items.append(item.name)
-        # try:
-        #     for item in purchased_items:
-        #         if item["item"] in items:
-        #             item["order"] = order
-        #             PurchasedItem.objects.create(**item)
-        #     return order
-        # except Exception as e:
-        #     order.delete()
-        #     return
-
         items = {}
+        no_item = True
         active_menus = Menu.objects.filter(active=True)
         for menu in active_menus:
             active_items = Item.objects.filter(menu__id=menu.id)
             for item in active_items:
                 items[item.name] = item.price
-        print(items)
         try:
             for item in purchased_items:
                 if items[item["item"]] == item["price"]:
                     item["order"] = order
                     PurchasedItem.objects.create(**item)
+                    no_item = False
+            if no_item:
+                raise serializers.ValidationError("Invalid items are found in the cart.")
             return order
         except:
-            raise serializers.ValidationError("Invalid items")
+            raise serializers.ValidationError("Invalid items are found in the cart.")
 
     def validate(self, data):
         """

@@ -441,6 +441,9 @@ class CreateOrderWithItems(generics.CreateAPIView):
         else:
             user = CustomUser.objects.get(email="walkincustomer@cafe.co.in")
             serializer.save(user=user)
+        cart_items = CartItem.objects.filter(user=self.request.user)
+        for item in cart_items:
+            item.delete()
 
 
 class OrderWithItemsDetail(generics.RetrieveAPIView):
