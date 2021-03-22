@@ -31,7 +31,7 @@
     </style>
 </head>
 <body>
-      <b-navbar toggleable="lg" type="dark" variant="info" fixed id="base">
+      <b-navbar toggleable="lg" type="dark" style="background-color:#171a29" fixed id="base">
         <b-navbar-brand href="/">Restocafe</b-navbar-brand>
 
         <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
@@ -39,21 +39,10 @@
         <b-collapse id="nav-collapse" is-nav>
           <b-navbar-nav>
               <b-nav-text class="pr-2">Hey, {{ user.name }} </b-nav-text>
-<!--            <b-nav-item href="{% url 'menu' %}">Menu</b-nav-item>-->
-<!--            <b-nav-item href="{% url 'checkout' %}">My Cart</b-nav-item>-->
-<!--              {% if user.groups.all.0.name == 'Customers' %}-->
-<!--            <b-nav-item href="{% url 'order' %}">My Orders</b-nav-item>-->
-<!--              {% else %}-->
-<!--              <b-nav-item-dropdown text="Manage Orders" right>-->
-<!--                <b-dropdown-item href="{% url 'staff_orders' %}">Deliver</b-dropdown-item>-->
-<!--                <b-dropdown-item href="{% url 'order' %}">View all Orders</b-dropdown-item>-->
-<!--            </b-nav-item-dropdown>-->
-<!--              {% endif %}-->
           </b-navbar-nav>
 
           <!-- Right aligned nav items -->
           <b-navbar-nav class="ml-auto" right>
-<!--              <b-nav-text class="pr-2">Hey, {{ user.name }} </b-nav-text>-->
               <b-nav-item href="{% url 'menu' %}">Menu</b-nav-item>
               <b-nav-item href="{% url 'checkout' %}">My Cart</b-nav-item>
               {% if user.groups.all.0.name == 'Customers' %}

@@ -25,7 +25,7 @@ from django_filters import rest_framework as filters
 def home(request):
     print(request.user)
     if request.user.is_anonymous:
-        return redirect(reverse('signup'))
+        return redirect(reverse('login'))
     group = request.user.groups.filter(user=request.user)[0]
     if group.name == "Customers":
         return redirect(reverse('menu'))
@@ -356,6 +356,13 @@ class MenuList(generics.ListCreateAPIView):
 
     def get_queryset(self):
         return Menu.objects.all()
+
+    def get_queryset(self):
+        group = self.request.user.groups.filter(user=self.request.user)[0]
+        if group.name == "Admin":
+            return Menu.objects.all()
+        else:
+            return Menu.objects.filter(active=True)
 
 
 class MenuDetail(generics.RetrieveUpdateDestroyAPIView):
