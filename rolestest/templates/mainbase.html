@@ -18,20 +18,31 @@
     {% endblock head %}
     <title>{% block title %}{% endblock title %}</title>
     <style>
-        html, body {
-          height: 100%;
-          width: 100%;
-          overflow-x: hidden;
-        }
         *{
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow-x: hidden;
+        }
+        .custom-container{
+            display: flex;
+            flex-flow: column;
+            height: 100%;
+            width: 100%;
+        }
+        .main{
+            flex: 1 1 auto;
+            overflow: auto;
+        }
     </style>
 </head>
 <body>
-      <b-navbar toggleable="lg" type="dark" style="background-color:#171a29" fixed id="base">
+    <div class="custom-container d-flex h-100" style="padding: 0px; flex-flow: column;">
+        <b-navbar toggleable="lg" type="dark" style="background-color:#171a29" fixed id="base">
         <b-navbar-brand href="/">Restocafe</b-navbar-brand>
 
         <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
@@ -64,7 +75,6 @@
           </b-navbar-nav>
         </b-collapse>
       </b-navbar>
-    <div class="container-fluid h-100">
 {% block body %}
 {% endblock body %}
     </div>

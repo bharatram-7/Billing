@@ -22,50 +22,51 @@ Menu
 {% endblock title %}
 
 {% block body %}
-<div class="row h-100" id="app">
+<div class="row no-gutters py-3 main bg-light" id="app">
     <div class="col-md-2"></div>
-    <div class="col-md-8 mt-3">
+    <div class="col-md-8 pt-3">
         <b-alert class="text-center" v-model="showDismissibleAlert" variant="danger" dismissible>
           [[ message ]]
         </b-alert>
-        <h3 class="text-center mb-3">Manage your Cart</h3>
-        <table class="table text-center">
-            <thead>
-                <tr>
-                    <th scope="col">No</th>
-                    <th scope="col">Item Name</th>
-                    <th scope="col">Price</th>
-                    <th scope="col">Quantity</th>
-                    <th scope="col">Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="cartitem in cart">
-                    <td></td>
-                    <td>[[cartitem.item.name]]</td>
-                    <td>₹[[cartitem.item.price]]</td>
-                    <td>
-                        <inc-dec class="text-center" :id="cartitem.item.id" :cartitemid="cartitem.id" :quantity="cartitem.quantity"
-                             :key="cartitem.id">
-                        </inc-dec>
-                    </td>
-                    <td>₹[[ itemtotal[cartitem.item.id] ]]</td>
-                </tr>
-                <tr>
-                    <th></th>
-                    <td></td>
-                    <td></td>
-                    <th>Total</th>
-                    <td>₹[[ carttotal ]]</td>
-                </tr>
-            </tbody>
-        </table>
-        <div class="row justify-content-end">
-            <button type="button" @click="order()" class="btn btn-success mr-4">Checkout</button>
-        </div>
+        <div class="card py-3 px-3">
+            <h3 class="text-center mb-3">Manage your Cart</h3>
+            <table class="table text-center">
+                <thead>
+                    <tr>
+                        <th scope="col">No</th>
+                        <th scope="col">Item Name</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">Quantity</th>
+                        <th scope="col">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="cartitem in cart">
+                        <td></td>
+                        <td>[[cartitem.item.name]]</td>
+                        <td>₹[[cartitem.item.price]]</td>
+                        <td>
+                            <inc-dec class="text-center" :id="cartitem.item.id" :cartitemid="cartitem.id" :quantity="cartitem.quantity"
+                                 :key="cartitem.id">
+                            </inc-dec>
+                        </td>
+                        <td>₹[[ itemtotal[cartitem.item.id] ]]</td>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <td></td>
+                        <td></td>
+                        <th>Total</th>
+                        <td>₹[[ carttotal ]]</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="row justify-content-end">
+                <button type="button" @click="order()" class="btn btn-success mr-4">Checkout</button>
+            </div>
         </div>
     </div>
-    <div class="col-md-2"></div>
+    <div class="col-md-2 h-100"></div>
 </div>
 <script>
     axios.defaults.xsrfCookieName = 'csrftoken';
