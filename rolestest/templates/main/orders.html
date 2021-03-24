@@ -10,55 +10,56 @@ Menu
 {% endblock title %}
 
 {% block body %}
-<div class="row h-100" id="app">
-    <div class="col-md-2 bg-light">
+<div class="row no-gutters py-3 main bg-light" id="app">
+    <div class="col-md-2">
 
     </div>
     <div class="col">
-        <h4 class="my-3 text-center">View All Orders</h4>
-    <template>
-        <div>
-            <b-table fixed hover :fields="fields" :items="orders" responsive="sm" class="text-center align-items-center"
-                     :per-page="perPage" :current-page="currentPage" responsive="sm">
-                <template #cell(index)="data">
-                    [[ data.index + 1 ]]
-                </template>
+        <div class="card px-3 py-2">
+        <h4 class="text-center py-1">View All Orders</h4>
+            <template>
+                <div>
+                    <b-table fixed hover :fields="fields" :items="orders" responsive="sm" class="text-center align-items-center"
+                             :per-page="perPage" :current-page="currentPage" responsive="sm">
+                        <template #cell(index)="data">
+                            [[ data.index + 1 ]]
+                        </template>
 
-                <template #cell(id)="data">
-                    <a :href=" baseURL + data.item.id "> Order #[[ data.item.id ]]</a>
-                </template>
+                        <template #cell(id)="data">
+                            <a :href=" baseURL + data.item.id "> Order #[[ data.item.id ]]</a>
+                        </template>
 
-                <template #cell(status)="data">
-                    <div v-if="data.item.status === 'P'">Pending</div>
-                    <div v-if="data.item.status === 'D'">Delivered</div>
-                </template>
+                        <template #cell(status)="data">
+                            <div v-if="data.item.status === 'P'">Pending</div>
+                            <div v-if="data.item.status === 'D'">Delivered</div>
+                        </template>
 
-                <template #cell(rating)="data">
-                    <div v-if="data.item.status === 'D'">
-                        <div v-if="data.item.rating">
-                            <b-form-rating id="rating-inline" variant="warning" no-border
-                                           readonly inline :value="data.item.rating"></b-form-rating>
-                        </div>
-                        <div v-else>
-                            {% if group == "Customers" %}
-                            <a :href="data.item.id + '/rating'" class="btn btn-primary">Rate us</a>
-                            {% else %}
-                            <button class="btn btn-secondary">N/A</button>
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div v-else>
-                        <button class="btn btn-secondary">N/A</button>
-                    </div>
-                </template>
-            </b-table>
-            <b-pagination v-model="currentPage" :total-rows="rows" :per-page="perPage"></b-pagination>
+                        <template #cell(rating)="data">
+                            <div v-if="data.item.status === 'D'">
+                                <div v-if="data.item.rating">
+                                    <b-form-rating id="rating-inline" variant="warning" no-border
+                                                   readonly inline :value="data.item.rating"></b-form-rating>
+                                </div>
+                                <div v-else>
+                                    {% if group == "Customers" %}
+                                    <a :href="data.item.id + '/rating'" class="btn btn-primary">Rate us</a>
+                                    {% else %}
+                                    <button class="btn btn-secondary">N/A</button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div v-else>
+                                <button class="btn btn-secondary">N/A</button>
+                            </div>
+                        </template>
+                    </b-table>
+                    <b-pagination v-model="currentPage" :total-rows="rows" :per-page="perPage"></b-pagination>
+                </div>
+            </template>
         </div>
-    </template>
     </div>
     <div class="col-md-2 bg-light"></div>
 </div>
-
 <script>
     Vue.component('rating', {
         props: ['rating'],

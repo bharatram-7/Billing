@@ -1,42 +1,42 @@
 {% extends 'mainbase.html' %}
 
 {% block body %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-2"></div>
-        <div class="col-md-8 card mx-2 my-2 py-3" id="app">
-            <template>
-                <div>
-                    <h2> Edit User </h2>
-                    <hr class="solid">
-                    <b-form @submit="editUser">
-                        <b-form-group label="Name" id="name-group"
-                                      label-for="name" v-model="user_data.name">
-                            <b-form-input
-                              id="name"
-                              v-model="user_data.name"
-                              placeholder="Enter name"
-                              required
-                            ></b-form-input>
-                        </b-form-group>
-                        <b-form-group label="Email Address" id="email-group"
-                                      label-for="email" >
-                            <b-form-input
-                              id="email"
-                              v-model="user_data.email"
-                              type="email"
-                              placeholder="Enter email"
-                              required
-                            ></b-form-input>
-                        </b-form-group>
-                        <b-button type="submit" variant="primary">Save</b-button>
-                    </b-form>
-                </div>
-            </template>
+    <div class="row no-gutters py-3 main bg-light">
+        <div class="col-md-3"></div>
+        <div class="col-md-6" id="app">
+            <div class="card px-3 py-3">
+                <template>
+                    <div>
+                        <h2> Edit User </h2>
+                        <hr class="solid">
+                        <b-form @submit="editUser">
+                            <b-form-group label="Name" id="name-group"
+                                          label-for="name" v-model="user_data.name">
+                                <b-form-input
+                                  id="name"
+                                  v-model="user_data.name"
+                                  placeholder="Enter name"
+                                  required
+                                ></b-form-input>
+                            </b-form-group>
+                            <b-form-group label="Email Address" id="email-group"
+                                          label-for="email" >
+                                <b-form-input
+                                  id="email"
+                                  v-model="user_data.email"
+                                  type="email"
+                                  placeholder="Enter email"
+                                  required
+                                ></b-form-input>
+                            </b-form-group>
+                            <b-button type="submit" variant="primary">Save</b-button>
+                        </b-form>
+                    </div>
+                </template>
+            </div>
         </div>
-        <div class="col-md-2"></div>
+        <div class="col-md-3"></div>
     </div>
-</div>
 
 
 

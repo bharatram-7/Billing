@@ -10,16 +10,20 @@ Signup
 {% block body %}
 {% load crispy_forms_tags %}
 
-<div class="row h-100" id="app">
+<div class="row no-gutters py-3 main bg-light" id="app">
     <div class="col-md-2"></div>
     <div class="col">
-        <h2 class="my-3">Add User</h2>
-        <hr class="solid">
-        <form method="post">
-            {% csrf_token %}
-            {{ form|crispy }}
-            <button type="submit" class="btn btn-primary">Create</button>
-        </form>
+        <div class="card px-4 py-3">
+            <h2 class="text-center">Add User</h2>
+            <hr class="solid">
+            <form method="post">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <div style="width:100%" class="text-left">
+                    <button type="submit" class="btn btn-primary right">Create</button>
+                </div>
+            </form>
+        </div>
     </div>
     <div class="col-md-2">
     </div>

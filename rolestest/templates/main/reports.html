@@ -10,9 +10,9 @@ Menu
 {% endblock title %}
 
 {% block body %}
-<div class="row h-100" id="app">
-    <div class="col-md-3">
-        <b-card class="mt-3">
+    <div class="row py-3 main bg-light" id="app">
+    <div class="col-md-3 pl-4">
+        <b-card class="">
             <h3 class="text-center">Filters</h3>
             <hr class="solid">
             <template>
@@ -39,7 +39,7 @@ Menu
             </template>
         </b-card>
     </div>
-    <div class="col-md-6 mt-3">
+    <div class="col-md-6">
         <b-alert v-model="showDismissibleAlert" variant="danger" dismissible>
             1) Either a date is not selected
             2) Or Please pick a start date that's lesser than the end date
@@ -86,7 +86,7 @@ Menu
         </b-card>
     </div>
     <div class="col-md-3">
-        <b-card class="mt-3">
+        <b-card>
             <h3 class="text-center">Stats</h3>
             <hr class="solid">
             <b-card class="text-center mt-1 mb-1">
@@ -190,6 +190,7 @@ Menu
                     }
                     this.total_sales = parseFloat(order.total) + this.total_sales
                 }
+                this.total_sales = this.total_sales.toFixed(2)
             },
             getOrders: function(req_url){
                 if(!req_url){
@@ -206,6 +207,15 @@ Menu
             },
             getFiltered: function(){
                 query = ''
+                if (this.start_date == null && this.end_date == null){
+                    if(this.user_id != 'all'){
+                        query = '?user=' + this.user_id
+                        this.getOrders("{% url 'view_order' %}" + query)
+                        return
+                    }
+                    this.getOrders("{% url 'view_order' %}")
+                    return
+                }
                 if(this.end_date < this.start_date || this.start_date == null || this.end_date == null){
                     this.showDismissibleAlert = true
                     return
