@@ -1,11 +1,57 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from .models import *
+from django.contrib.auth.models import Group
 
 
 class UserSerializer(serializers.ModelSerializer):
+    groups = serializers.SlugRelatedField(queryset=Group.objects.all().exclude(name='Customers'),
+                                          many=True, slug_field="name", required=False)
+
     class Meta:
         model = CustomUser
+        fields = ['id', 'name', 'email', 'groups']
+
+    def update(self, instance, validated_data):
+        groups = ''
+        if 'groups' in validated_data:
+            groups = validated_data.pop('groups')
+        print(groups)
+        if len(groups) > 1:
+            raise serializers.ValidationError("User can't have more than one group")
+        if groups:
+            if groups[0].name not in ["Admin", "Billing Clerk"]:
+                raise serializers.ValidationError("Please select either Admin or Billing Clerk")
+        print(instance.groups.all()[0])
+
+        if instance.groups.all()[0].name == "Customers" and groups:
+            raise serializers.ValidationError("Cannot change customer's roles")
+
+        instance.name = validated_data['name']
+        user = CustomUser.objects.get(id=instance.id)
+        if instance.email != validated_data['email']:
+            existing_user = CustomUser.objects.filter(email=validated_data['email'])
+            if existing_user:
+                raise serializers.ValidationError("Email address already exists in the system")
+            instance.email = validated_data['email']
+            instance.save()
+            user = CustomUser.objects.get(id=instance.id)
+            password = CustomUser.objects.make_random_password()
+            user.set_password(password)
+            user.save()
+        else:
+            instance.save()
+
+        if groups:
+            if instance.groups.all()[0] != groups[0] and instance.id != self.context['request'].user.id:
+                user.groups.set(groups)
+
+        return CustomUser.objects.get(id=instance.id)
+    
+
+class GroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
         fields = ['id', 'name', 'email']
 
 
@@ -82,6 +128,7 @@ class UpdateDeleteCartSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItem
         fields = ['id', 'item', 'quantity', 'user']
+        read_only_fields = ['id', 'item', 'user']
 
 
 class PurchasedItemSerializer(serializers.ModelSerializer):
@@ -97,11 +144,12 @@ class PurchasedItemSerializer(serializers.ModelSerializer):
 class OrderWithItemsSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     purchased_items = PurchasedItemSerializer(many=True, required=True)
+    date = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False, read_only=True)
 
     class Meta:
         model = Order
         fields = '__all__'
-        read_only_fields = ['date']
+        read_only_fields = ['date', 'rating']
 
     def create(self, validated_data):
         purchased_items = validated_data.pop('purchased_items')

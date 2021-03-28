@@ -13,6 +13,9 @@ Menu
 <div class="row no-gutters py-3 main bg-light" id="app">
     <div class="col-md-2"></div>
     <div class="col-md-8">
+        <b-alert class="text-center" v-model="showDismissibleAlert" variant="danger" dismissible>
+          [[ message ]]
+        </b-alert>
         <div class="card px-3 py-2">
             <b-card class="mt-3">
                 <b-row>
@@ -37,6 +40,7 @@ Menu
                                 v-model="menu_name"
                                 :state="name_state"
                                 required
+                                maxlength="25"
                             ></b-form-input>
                         </b-form-group>
                         <b-form-checkbox
@@ -161,7 +165,9 @@ Menu
                 is_active: true,
                 active: [],
                 inactive: [],
-                boxTwo: ''
+                boxTwo: '',
+                showDismissibleAlert: false,
+                message: ''
             }
         },
         mounted: function() {
@@ -205,9 +211,12 @@ Menu
                     window.location.href = redirect_url
                 })
                 .catch(error => {
-                    console.log(error)
-                    alert("Something went wrong!")
-                    return
+                    this.message = ''
+                    console.log(error.data)
+                    for (var i in error.data){
+                        this.message += ("Field: " + i + " - " + error.data[i])
+                    }
+                    this.showDismissibleAlert = true
                 })
 
                 this.$nextTick(() => {

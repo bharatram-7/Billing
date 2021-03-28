@@ -11,8 +11,8 @@ Menu
 
 {% block body %}
 <div class="row no-gutters py-3 main bg-light" id="app">
-    <div class="col-md-3"></div>
-    <div class="col-md-6">
+    <div class="col-md-2 col-sm-0"></div>
+    <div class="col-md-6 col-sm-8 px-3">
         <div class="card px-3 pt-3 mb-2" style="background-color:#fff;" v-for="menu in menus">
             <h3 :id="menu.name">[[ menu.name ]]</h3>
             <hr class="solid">
@@ -37,7 +37,29 @@ Menu
             </b-card>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-3 col-sm-4">
+        <div class="card">
+            <h4 class="pl-3 py-2 text-center">Cart Summary</h4>
+        <b-table class="text-center" fixed responsive :items="cart" :fields="fields">
+            <template #cell(item)="data">
+                [[ data.item.item.name ]]
+            </template>
+            <template #cell(total)="data">
+                ₹[[ itemtotal[data.item.item.id] ]]
+            </template>
+            <template v-slot:custom-foot="cart">
+                <b-tr>
+                    <b-td></b-td>
+                    <b-th>Total</b-th>
+                    <b-td>₹[[ carttotal ]]</b-td>
+                </b-tr>
+            </template>
+        </b-table>
+        </div>
+        <a v-if="carttotal != 0" href="/checkout" role="button" class="btn btn-success btn-block my-2">Proceed to Cart</a>
+    </div>
+    <div class="col-md-1 col-sm-0">
+
     </div>
 </div>
 
@@ -124,9 +146,13 @@ Menu
         el: '#app',
         data: function(){
             return{
+                fields: ['item', 'quantity', 'total'],
                 menus: null,
                 cartitems: {},
-                itemquantity: {}
+                itemquantity: {},
+                cart: [],
+                itemtotal: {},
+                carttotal: 0
             }
         },
         mounted: function() {
@@ -140,18 +166,27 @@ Menu
         },
         methods: {
             getcartitems: function(){
-            axios.get("{% url 'view_cart_item' %}")
-            .then(response => {
-                this.cart = response.data
-                for (var cartitem of response.data){
-                    Vue.set(this.cartitems, cartitem.item, cartitem.id)
-                    Vue.set(this.itemquantity, cartitem.item, cartitem.quantity)
+                axios.get("{% url 'view_cart' %}")
+                .then(response => {
+                    this.cart = response.data
+                    for (var cartitem of response.data){
+                        Vue.set(this.cartitems, cartitem.item.id, cartitem.id)
+                        Vue.set(this.itemquantity, cartitem.item.id, cartitem.quantity)
+                    }
+                    this.computeTotal()
+                })
+                .catch(function(error){
+                    alert(error)
+                })
+            },
+            computeTotal: function(){
+                this.carttotal = 0
+                for (var cartitem of this.cart){
+                    Vue.set(this.itemtotal, cartitem.item.id, (cartitem.quantity*cartitem.item.price).toFixed(2))
+                    this.carttotal += (cartitem.quantity*cartitem.item.price)
                 }
-            })
-            .catch(function(error){
-                alert(error)
-            })
-            }
+                this.carttotal = this.carttotal.toFixed(2)
+            },
         }
     });
 </script>

@@ -21,11 +21,16 @@
     </style>
 </head>
 <body>
-<div class="container" id="app">
+<div class="container py-3" id="app">
     <div class="row">
         <div class="col-xs-12 col">
-            <div class="invoice-title">
-                <h2>Invoice</h2><h3 class="pull-right">Order # {{id}}</h3>
+            <div class="row justify-contents-between">
+                <div class="col-md-6">
+                    <h2>Invoice</h2>
+                </div>
+                <div class="col-md-6 text-right">
+                    <h3 style="display:inline-block">Order # {{id}}</h3>
+                </div>
             </div>
             <hr>
             <div class="row">
@@ -37,8 +42,8 @@
                 </div>
                 <div class="col-xs-6 col-md-6 text-right">
                     <address>
-                    <strong>Shipped To:</strong><br>
-                        [[order.user.name]]<br>
+                    <strong>Email:</strong><br>
+                        [[order.user.email]]<br>
                     </address>
                 </div>
             </div>
@@ -47,13 +52,12 @@
                     <address>
                         <strong>Payment Method:</strong><br>
                         Cash<br>
-                        [[order.user.email]]
                     </address>
                 </div>
                 <div class="col-xs-6 col-md-6 text-right">
                     <address>
-                        <strong>Order Date:</strong><br>
-                        [[date]]<br><br>
+                        <strong>Order Date & Time:</strong><br>
+                        [[ order.date ]]<br><br>
                     </address>
                 </div>
             </div>
@@ -115,10 +119,10 @@ var app = new Vue({
             axios.get("{% url 'view_order' %}" + {{ id }})
             .then(response => {
                 this.order = response.data
-                console.log(response.data)
-                var msec = Date.parse(this.order.date);
-                var d = new Date(msec);
-                this.date = d
+<!--                console.log(response.data)-->
+<!--                var msec = Date.parse(this.order.date);-->
+<!--                var d = new Date(msec);-->
+<!--                this.date = d-->
             })
             .catch(function(error){
                 console.log(error)

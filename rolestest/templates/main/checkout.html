@@ -155,9 +155,10 @@ Menu
             computeTotal: function(){
                 this.carttotal = 0
                 for (var cartitem of this.cart){
-                    Vue.set(this.itemtotal, cartitem.item.id, cartitem.quantity*cartitem.item.price)
-                    this.carttotal += cartitem.quantity*cartitem.item.price
+                    Vue.set(this.itemtotal, cartitem.item.id, (cartitem.quantity*cartitem.item.price).toFixed(2))
+                    this.carttotal += (cartitem.quantity*cartitem.item.price)
                 }
+                this.carttotal = this.carttotal.toFixed(2)
             },
             getcartitems: function(){
                 axios.get("{% url 'view_cart' %}")

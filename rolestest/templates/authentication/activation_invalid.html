@@ -1,11 +1,32 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-Invalid activation link
-<a href="{% url 'signup' %}">Signup</a>
-</body>
-</html>
+{% extends 'base.html' %}
+{% block head %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/signup.css' %}">
+<style>
+
+</style>
+{% endblock head %}
+{% block title %}
+Success
+{% endblock title %}
+
+{% block body %}
+{% load crispy_forms_tags %}
+<section class="container-fluid h-100">
+    <section class="row justify-content-center align-items-center h-100">
+        <section class="col-md-4 col-12 col-sm-6">
+            <section class="mx-2">
+                <div class="card">
+                  <div class="card-body">
+                      <h2 class="text-center mb-5 mt-3">Invalid</h2>
+                      <hr class="mb-3" style="background-color:#ccc;">
+                      <p class="card-text text-center">This activation link is invalid.</p>
+                  </div>
+                </div>
+            </section>
+        </section>
+        <section class="col-md-8 col-12 col-sm-6 h-100" style="background-color:#171a29">
+        </section>
+    </section>
+</section>
+{% endblock body %}

@@ -50,10 +50,6 @@ Menu
                 <div>
                     <b-table fixed hover :fields="fields" :items="orders" responsive="sm" class="text-center align-items-center"
                              :per-page="perPage" :current-page="currentPage" responsive="sm">
-                        <template #cell(index)="data">
-                            [[ data.index + 1 ]]
-                        </template>
-
                         <template #cell(id)="data">
                             <a :href=" baseURL + data.item.id "> Order #[[ data.item.id ]]</a>
                         </template>
@@ -144,7 +140,6 @@ Menu
         el: '#app',
         data: {
             fields: [
-                'index',
                 {key: 'id', label: 'Order ID', sortable: true},
                 {key: 'date', label: 'Date', sortable: true},
                 {key: 'total', label: 'Total', sortable: true},

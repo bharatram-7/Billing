@@ -59,7 +59,7 @@
               {% if user.groups.all.0.name == 'Customers' %}
               <b-nav-item class="mx-3" href="{% url 'order' %}">My Orders</b-nav-item>
               {% else %}
-              <b-nav-item-dropdown class="mx-3" text="Manage Orders" right>
+              <b-nav-item-dropdown class="mx-3" text="Orders" right>
                 <b-dropdown-item href="{% url 'staff_orders' %}">Manage Orders</b-dropdown-item>
                 <b-dropdown-item href="{% url 'order' %}">View all Orders</b-dropdown-item>
               </b-nav-item-dropdown>
