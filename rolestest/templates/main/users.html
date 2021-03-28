@@ -86,7 +86,7 @@ Users
         methods: {
             deleteConfirmation() {
                 this.confirmDelete = ''
-                this.$bvModal.msgBoxConfirm('Please confirm that you want to delete this user.', {
+                this.$bvModal.msgBoxConfirm('Please confirm that you want to delete this user. Also note that deleting a customer will change the ownership of his orders to "Deleted User"', {
                 title: 'Delete Confirm',
                 size: 'md',
                 buttonSize: 'md',

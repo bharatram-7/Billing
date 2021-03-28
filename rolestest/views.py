@@ -494,7 +494,7 @@ class UserList(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated, CustomDjangoModelPermissions]
 
     def get_queryset(self):
-        return CustomUser.objects.all().exclude(id=8)
+        return CustomUser.objects.all().exclude(id=8).exclude(id=23)
 
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -502,7 +502,7 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated, CustomDjangoModelPermissions]
 
     def get_queryset(self):
-        return CustomUser.objects.all().exclude(id=8)
+        return CustomUser.objects.all().exclude(id=8).exclude(id=23)
 
     def perform_destroy(self, instance):
         if instance.id == self.request.user.id:

@@ -87,7 +87,7 @@
                                     <td>[[item.item]]</td>
                                     <td class="text-center">₹[[item.price]]</td>
                                     <td class="text-center">[[item.quantity]]</td>
-                                    <td class="text-right">₹[[item.quantity * item.price]]</td>
+                                    <td class="text-right">₹[[(item.quantity * item.price).toFixed(2)]]</td>
                                 </tr>
                                 <tr>
                                     <td class="no-line"></td>
@@ -119,10 +119,6 @@ var app = new Vue({
             axios.get("{% url 'view_order' %}" + {{ id }})
             .then(response => {
                 this.order = response.data
-<!--                console.log(response.data)-->
-<!--                var msec = Date.parse(this.order.date);-->
-<!--                var d = new Date(msec);-->
-<!--                this.date = d-->
             })
             .catch(function(error){
                 console.log(error)

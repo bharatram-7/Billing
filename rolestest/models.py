@@ -48,7 +48,7 @@ class CustomUser(AbstractUser):
 
 
 class Menu(models.Model):
-    name = models.CharField(max_length=50, unique=True, blank=False)
+    name = models.CharField(max_length=25, unique=True, blank=False)
     active = models.BooleanField(default=False)
 
     class Meta:
@@ -64,8 +64,8 @@ class Menu(models.Model):
 
 
 class Item(models.Model):
-    name = models.CharField(max_length=100)
-    description = models.CharField(max_length=300)
+    name = models.CharField(max_length=25)
+    description = models.CharField(max_length=150)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     image = models.ImageField(upload_to='images/%Y/%m/%d',
                               validators=[image_restriction],
@@ -110,6 +110,10 @@ class CartItem(models.Model):
         return self.user.name + str(self.id)
 
 
+def get_deleted_user():
+    return CustomUser.objects.get(email="deleteduser@cafe.co.in")
+
+
 class Order(models.Model):
 
     class Rating(models.IntegerChoices):
@@ -126,7 +130,7 @@ class Order(models.Model):
         (DELIVERED, 'Delivered')
     ]
 
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.SET(get_deleted_user))
     date = models.DateTimeField(default=timezone.now())
     total = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(
@@ -147,7 +151,7 @@ class Order(models.Model):
 
 
 class PurchasedItem(models.Model):
-    item = models.CharField(max_length=100)
+    item = models.CharField(max_length=25)
     quantity = models.PositiveSmallIntegerField(blank=False, null=False)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='purchased_items')
