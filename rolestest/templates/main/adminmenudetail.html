@@ -79,6 +79,7 @@ Menu
                                 <b-img class="mr-3" v-if="item.image" left :src="item.image" alt="No image found" width="120px" height="120px"></b-img>
                                 <b-img class="mr-3" v-else left src="{% static 'img/no-image.jpg' %}" alt="No image found" width="120px" height="120px"></b-img>
                                 <b-card-text><h5>[[ item.name ]]</h5></b-card-text>
+                                <b-card-text>₹[[ item.price ]]</b-card-text>
                                 <b-card-text>[[ item.description ]]</b-card-text>
                             </div>
                             <div class="col text-right d-flex flex-column justify-contents-center">
@@ -238,7 +239,9 @@ var app = new Vue({
                 })
                 .catch(error => {
                     console.log(error)
-                    alert("Something went wrong!")
+                    if (error.data.name){
+                        alert(error.data.name)
+                    }
                     return
                 })
 

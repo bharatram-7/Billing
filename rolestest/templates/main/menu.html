@@ -13,7 +13,7 @@ Menu
 <div class="row no-gutters py-3 main bg-light" id="app">
     <div class="col-md-2 col-sm-0"></div>
     <div class="col-md-6 col-sm-8 px-3">
-        <div class="card px-3 pt-3 mb-2" style="background-color:#fff;" v-for="menu in menus">
+        <div class="card px-3 pt-3 mb-2" style="background-color:#fff;" v-for="menu in menus" v-if="(menu.items).length >= 1">
             <h3 :id="menu.name">[[ menu.name ]]</h3>
             <hr class="solid">
             <b-card v-for="item in menu.items" :key="item.id" class="mb-3">
