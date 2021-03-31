@@ -1,0 +1,12 @@
+{% autoescape off %}
+
+Hi {{user.name}}
+
+We are delighted to have you onboard. Visit the link below to embark on a remarkable journey with us :)
+
+http://{{ domain }}{% url 'set_password' uidb64=uid token=token %}
+
+Cheers,
+Team Restocafe
+
+{% endautoescape %}

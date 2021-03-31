@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils import timezone
-from .validators import image_restriction
+from .validators import image_restriction, price_restriction
 
 
 class CustomUserManager(BaseUserManager):
@@ -54,10 +54,6 @@ class Menu(models.Model):
     class Meta:
         verbose_name = 'menu'
         verbose_name_plural = 'menus'
-        permissions = [
-            ('can_view_menus', 'Can view all menus'),
-            ('can_manage_menus', 'Can create, edit, or delete menus'),
-        ]
 
     def __str__(self):
         return self.name
@@ -65,8 +61,8 @@ class Menu(models.Model):
 
 class Item(models.Model):
     name = models.CharField(max_length=25)
-    description = models.CharField(max_length=150)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.CharField(max_length=80)
+    price = models.DecimalField(max_digits=10, decimal_places=2, validators=[price_restriction])
     image = models.ImageField(upload_to='images/%Y/%m/%d',
                               validators=[image_restriction],
                               null=True, blank=True)
@@ -75,10 +71,6 @@ class Item(models.Model):
     class Meta:
         verbose_name = 'item'
         verbose_name_plural = 'items'
-        permissions = [
-            ('can_view_items', 'Can view all items'),
-            ('can_manage_items', 'Can create, edit, or delete items'),
-        ]
 
     def __str__(self):
         return self.name
@@ -101,13 +93,8 @@ class CartItem(models.Model):
 
     objects = CartManager()
 
-    class Meta:
-        permissions = [
-            ('can_manage_carts', 'Can view, create, edit, or delete cart items'),
-        ]
-
     def __str__(self):
-        return self.user.name + str(self.id)
+        return self.user.name + ' ' + str(self.id) + ' ' + str(self.item.name)
 
 
 def get_deleted_user():
@@ -131,7 +118,7 @@ class Order(models.Model):
     ]
 
     user = models.ForeignKey(CustomUser, on_delete=models.SET(get_deleted_user))
-    date = models.DateTimeField(default=timezone.now())
+    date = models.DateTimeField(default=timezone.now)
     total = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(
         max_length=10,
@@ -140,12 +127,6 @@ class Order(models.Model):
     )
     rating = models.IntegerField(choices=Rating.choices, null=True, blank=True, default=None)
 
-    class Meta:
-        permissions = [
-            ('can_view_orders', 'Can view his/her orders'),
-            ('can_view_all_orders', 'Can view all orders'),
-        ]
-
     def __str__(self):
         return self.status
 
@@ -153,14 +134,8 @@ class Order(models.Model):
 class PurchasedItem(models.Model):
     item = models.CharField(max_length=25)
     quantity = models.PositiveSmallIntegerField(blank=False, null=False)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2, validators=[price_restriction])
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='purchased_items')
-
-    class Meta:
-        permissions = [
-            ('can_view_purchased_items', 'Can view his/her purchased items'),
-            ('can_view_all_purchased_items', 'Can view all purchased items'),
-        ]
 
     def __str__(self):
         return str(self.id) + self.item

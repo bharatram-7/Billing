@@ -10,8 +10,8 @@ from django.views.generic import TemplateView
 urlpatterns = [
     path('', views.home, name='root'),
     path('signup/', views.signup, name='signup'),
+    path('activate_account/<slug:uidb64>/<slug:token>/', views.activate, name='set_password'),
     path('activation/sent', views.activation_sent_view, name='activation_email_sent'),
-    path('activation/<slug:uidb64>/<slug:token>/', views.activate, name='activate'),
     path('login/', auth_views.LoginView.as_view(template_name="authentication/login.html",
          authentication_form=UserLoginForm,
          redirect_authenticated_user=True), name='login'),

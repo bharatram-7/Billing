@@ -10,3 +10,7 @@ def image_restriction(image):
     if not image_width == image_height:
         raise ValidationError("Image width needs to be equal to it's height")
 
+
+def price_restriction(value):
+    if value < 0:
+        raise ValidationError("Price cannot have a negative value")

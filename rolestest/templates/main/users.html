@@ -13,6 +13,13 @@ Users
 <div class="row no-gutters py-3 main bg-light">
     <div class="col-md-2"></div>
     <div class="col-md-8" id="app">
+        {% if messages %}
+            {% for message in messages %}
+                <b-alert class="text-center" show dismissible>
+                  {{ message }}
+                </b-alert>
+            {% endfor %}
+        {% endif %}
         <div class="card pt-3 px-3">
             <h3 class="text-center">Manage Users</h3>
             <hr class="solid">

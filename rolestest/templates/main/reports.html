@@ -38,6 +38,11 @@ Menu
                 </b-form>
             </template>
         </b-card>
+        <b-card class="mt-3">
+            <h3 class="text-center">Export Data</h3>
+            <hr class="solid">
+            <button @click.stop.prevent="downloadCsv()" class="btn btn-primary btn-block" type="submit">Download CSV</button>
+        </b-card>
     </div>
     <div class="col-md-6">
         <b-alert v-model="showDismissibleAlert" variant="danger" dismissible>
@@ -114,10 +119,14 @@ Menu
                 </b-card-text>
             </b-card>
         </b-card>
+
+        </form>
     </div>
 </div>
 
 <script>
+    axios.defaults.xsrfCookieName = 'csrftoken';
+    axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
     Vue.component('rating', {
         props: ['rating'],
         methods: {
@@ -157,7 +166,10 @@ Menu
             five_stars: 0,
             delivered: 0,
             ratings: 0,
-            total_sales: 0.0
+            total_sales: 0.0,
+            e_start_date: null,
+            e_end_date: null,
+            e_user_id: null
         },
         computed:{
             rows() {
@@ -195,6 +207,7 @@ Menu
                 .then(response => {
                     this.orders = response.data
                     this.getCsatInfo()
+                    console.log(typeof this.orders)
                 })
                 .catch(function(error){
                     console.log(error)
@@ -222,6 +235,40 @@ Menu
                     query = query + '&user=' + this.user_id
                 }
                 this.getOrders("{% url 'view_order' %}" + query)
+                this.e_start_date = this.start_date
+                this.e_end_date = this.end_date
+                this.e_user_id = this.user_id
+            },
+            downloadCsv: function(){
+                if (this.orders){
+                    var data = this.convertJsonToCsv(this.orders)
+                    const blob = new Blob([data], {type: "octet/stream"})
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'reports' + Date.now() + '.csv';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                }
+                console.log()
+            },
+            convertJsonToCsv: function(data){
+                var str = 'Order ID, Customer, Date, Status, Rating, Total, \r\n'
+
+                for (var i=0; i < data.length; i++){
+                    var line = ''
+                    line += data[i]['id'] + ','
+                    line += '"' + data[i]['user'] + '"' + ','
+                    line += '"' + data[i]['date'] + '"' +  ','
+                    line += '"' + data[i]['status'] + '"' + ','
+                    line += data[i]['rating'] + ','
+                    line += data[i]['total'] + ','
+                    str += line + '\r\n'
+                }
+                str += ',,,,Grand Total,'+ this.total_sales + '\r\n'
+                return str
             }
         }
     });

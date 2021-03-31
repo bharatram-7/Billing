@@ -2,6 +2,11 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from .models import *
 from django.contrib.auth.models import Group
+from django.contrib.sites.shortcuts import get_current_site
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
+from .tokens import account_activation_token
+from django.template.loader import render_to_string
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -12,39 +17,55 @@ class UserSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ['id', 'name', 'email', 'groups']
 
-    def update(self, instance, validated_data):
-        groups = ''
-        if 'groups' in validated_data:
-            groups = validated_data.pop('groups')
-        print(groups)
+    def create(self, validated_data):
+        groups = validated_data.pop("groups")
         if len(groups) > 1:
             raise serializers.ValidationError("User can't have more than one group")
-        if groups:
-            if groups[0].name not in ["Admin", "Billing Clerk"]:
-                raise serializers.ValidationError("Please select either Admin or Billing Clerk")
-        print(instance.groups.all()[0])
+        email = validated_data['email']
+        name = validated_data['name']
+        user = CustomUser(email=email, name=name)
+        user.save()
+        user.groups.set(groups)
+        print(self.context)
+        current_site = get_current_site(self.context['request'])
+        subject = 'Activate your account'
+        message = render_to_string('authentication/staff_activation_template.html', {
+            'user': user,
+            'domain': current_site.domain,
+            'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+            'token': account_activation_token.make_token(user),
+        })
+        user.email_user(subject, message)
+        return user
 
-        if instance.groups.all()[0].name == "Customers" and groups:
+    def update(self, instance, validated_data):
+        groups = ''
+        user = CustomUser.objects.get(id=instance.id)
+        current_group = instance.groups.all()[0].name
+        # Since groups are optional
+        if 'groups' in validated_data:
+            groups = validated_data.pop('groups')
+        if len(groups) > 1:
+            raise serializers.ValidationError("User can't have more than one group")
+        # Customer's group can't be edited
+        if current_group == "Customers" and groups:
             raise serializers.ValidationError("Cannot change customer's roles")
+        # Update group only if it's not the same as current group & can't edit another admin
+        if groups and instance.groups.all()[0] != groups[0]:
+            if instance.id != self.context['request'].user.id:
+                user.groups.set(groups)
+            elif current_group == "Admin":
+                raise serializers.ValidationError("Cannot edit self/another admin's role")
 
         instance.name = validated_data['name']
-        user = CustomUser.objects.get(id=instance.id)
         if instance.email != validated_data['email']:
-            existing_user = CustomUser.objects.filter(email=validated_data['email'])
-            if existing_user:
-                raise serializers.ValidationError("Email address already exists in the system")
             instance.email = validated_data['email']
-            instance.save()
-            user = CustomUser.objects.get(id=instance.id)
+            user = instance.save()
             password = CustomUser.objects.make_random_password()
             user.set_password(password)
             user.save()
         else:
             instance.save()
-
-        if groups:
-            if instance.groups.all()[0] != groups[0] and instance.id != self.context['request'].user.id:
-                user.groups.set(groups)
 
         return CustomUser.objects.get(id=instance.id)
     
@@ -168,9 +189,11 @@ class OrderWithItemsSerializer(serializers.ModelSerializer):
                     PurchasedItem.objects.create(**item)
                     no_item = False
             if no_item:
+                order.delete()
                 raise serializers.ValidationError("Invalid items are found in the cart.")
             return order
         except:
+            order.delete()
             raise serializers.ValidationError("Invalid items are found in the cart.")
 
     def validate(self, data):

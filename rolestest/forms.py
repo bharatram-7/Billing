@@ -1,9 +1,9 @@
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, SetPasswordForm
 from .models import CustomUser, Item
 from django import forms
 
 
-class CreateUserForm(UserCreationForm):
+class CreateUserFormOld(UserCreationForm):
     email = forms.EmailField(widget=forms.TextInput(
         attrs={'class': 'text-input',
                'label': 'Your Email Address'}
@@ -18,17 +18,38 @@ class CreateUserForm(UserCreationForm):
         fields = ['email', 'name']
 
 
-class CreateStaffForm(CreateUserForm):
+class CreateCustomerForm(forms.ModelForm):
+    name = forms.CharField(widget=forms.TextInput(
+        attrs={'label': 'Your Name'}
+    ))
+
+    email = forms.EmailField(widget=forms.TextInput(
+        attrs={'class': 'text-input',
+               'label': 'Your Email Address'}
+    ))
+
+    class Meta:
+        model = CustomUser
+        fields = ['name', 'email']
+
+
+class CreateStaffForm(forms.ModelForm):
     ROLE_CHOICES = [
         ('Admin', 'Admin'),
         ('Billing Clerk', 'Billing Clerk')
     ]
-
+    name = forms.CharField(widget=forms.TextInput(
+        attrs={'label': 'Name'}
+    ))
+    email = forms.EmailField(widget=forms.TextInput(
+        attrs={'class': 'text-input',
+               'label': 'Email Address'}
+    ))
     role = forms.ChoiceField(choices=ROLE_CHOICES)
 
     class Meta:
         model = CustomUser
-        fields = ['email', 'name', 'password1', 'password2', 'role']
+        fields = ['name', 'email', 'role']
 
 
 class UserLoginForm(AuthenticationForm):
@@ -39,9 +60,8 @@ class UserLoginForm(AuthenticationForm):
 
 class ItemForm(forms.ModelForm):
 
+    price = forms.DecimalField(max_value=100000, min_value=0, max_digits=8, decimal_places=2)
+
     class Meta:
         model = Item
         exclude = ['menu']
-
-
-

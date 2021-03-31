@@ -6,8 +6,6 @@ You're just one step away from ordering our mouth-watering food items.
 
 Please click the link below to activate your account:
 
-http://{{ domain }}{% url 'activate' uidb64=uid token=token %}
-
-Upon activating, you will be redirected to login.
+http://{{ domain }}{% url 'set_password' uidb64=uid token=token %}
 
 {% endautoescape %}

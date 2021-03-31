@@ -1,9 +1,11 @@
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.contrib.auth import login
 from django.views.generic import ListView, View
+from django.http import HttpResponse
 from .models import *
 from django.contrib.auth.models import Group
-from .forms import CreateUserForm, CreateStaffForm, ItemForm
+from .forms import CreateCustomerForm, CreateStaffForm, ItemForm
+from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from rest_framework import generics, permissions
 from .serializers import *
@@ -17,12 +19,14 @@ from .tokens import account_activation_token
 from django.template.loader import render_to_string
 from .filters import OrderFilter
 from django_filters import rest_framework as filters
+# Importing django messages
+
+from django.contrib import messages
 
 # Create your views here.
 
 
 def home(request):
-    print(request.user)
     if request.user.is_anonymous:
         return redirect(reverse('login'))
     group = request.user.groups.filter(user=request.user)[0]
@@ -43,16 +47,25 @@ def activate(request, uidb64, token):
     except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
         user = None
     if user is not None and account_activation_token.check_token(user, token):
-        user.is_active = True
-        user.user_activated = True
-        user.save()
-        return redirect(reverse('login'))
+        form = SetPasswordForm(request.user, request.POST or None)
+        if form.is_valid():
+            user.set_password(form.cleaned_data['new_password1'])
+            user.is_active = True
+            user.user_activated = True
+            user.save()
+            login(request, user)
+            return redirect('root')
+        else:
+            context = {
+                "form": form
+            }
+            return render(request, 'authentication/setpassword.html', context=context)
     else:
         return render(request, 'authentication/activation_invalid.html')
 
 
 def signup(request):
-    form = CreateUserForm(request.POST or None)
+    form = CreateCustomerForm(request.POST or None)
     if form.is_valid():
         user = form.save()
         user.refresh_from_db()
@@ -65,14 +78,20 @@ def signup(request):
 
         current_site = get_current_site(request)
         subject = 'Activate your account'
-        message = render_to_string('authentication/activation_template.html', {
+        message = render_to_string('authentication/customer_activation_template.html', {
             'user': user,
             'domain': current_site.domain,
             'uid': urlsafe_base64_encode(force_bytes(user.pk)),
             'token': account_activation_token.make_token(user),
         })
-        user.email_user(subject, message)
-        return redirect('activation_email_sent')
+        print(message)
+        try:
+            user.email_user(subject, message)
+            return redirect('activation_email_sent')
+        except Exception as e:
+            print(e)
+            user.delete()
+            return redirect('emailfailure.html')
     else:
         context = {
             "form": form
@@ -83,19 +102,33 @@ def signup(request):
 def create_staff(request):
     form = CreateStaffForm(request.POST or None)
     if form.is_valid():
-        user = form.save()
+        user = form.save(commit=False)
+        user.name = form.cleaned_data.get('name')
+        user.email = form.cleaned_data.get('email')
+        user.is_active = False
+        user.save()
         role = form.cleaned_data['role']
         roles = ['Admin', 'Billing Clerk']
         if role in roles:
             group = Group.objects.get(name=role)
             user.groups.set([group])
-        return redirect(reverse('users'))
+
+        current_site = get_current_site(request)
+        subject = 'Activate your account'
+        message = render_to_string('authentication/staff_activation_template.html', {
+            'user': user,
+            'domain': current_site.domain,
+            'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+            'token': account_activation_token.make_token(user),
+        })
+        user.email_user(subject, message)
+        messages.success(request, "User successfully created")
+        return redirect('users')
     else:
-        pass
-    context = {
-        "form": form
-    }
-    return render(request, 'main/adduser.html', context=context)
+        context = {
+            "form": form
+        }
+        return render(request, 'main/adduser.html', context=context)
 
 
 class ActiveMenuList(LoginRequiredMixin, ListView):
@@ -489,7 +522,7 @@ class PurchasedItemList(generics.ListCreateAPIView):
         return PurchasedItem.objects.all()
 
 
-class UserList(generics.ListAPIView):
+class UserList(generics.ListCreateAPIView):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated, CustomDjangoModelPermissions]
 
