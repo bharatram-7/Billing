@@ -262,7 +262,11 @@ Menu
                     line += data[i]['id'] + ','
                     line += '"' + data[i]['user'] + '"' + ','
                     line += '"' + data[i]['date'] + '"' +  ','
-                    line += '"' + data[i]['status'] + '"' + ','
+                    if (data[i]['status'] == "D"){
+                        line += '"' + "Delivered" + '"' + ','
+                    }else{
+                        line += '"' + "Pending" + '"' + ','
+                    }
                     line += data[i]['rating'] + ','
                     line += data[i]['total'] + ','
                     str += line + '\r\n'

@@ -102,7 +102,9 @@ Menu
                 this.$parent.getcartitems()
             })
             .catch(function(error){
-                alert(error.data)
+                if (error.data.quantity){
+                    alert(error.data.quantity)
+                }
             })
         },
         delete: function(){

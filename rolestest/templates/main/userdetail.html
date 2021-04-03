@@ -34,7 +34,7 @@
                                 ></b-form-input>
                             </b-form-group>
 
-                            <b-form-group v-if="is_staff && {{ user.id }} != user_data.id" label="Role" id="role-label"
+                            <b-form-group v-if="is_clerk" label="Role" id="role-label"
                                           label-for="role" >
                                 <b-form-select v-model="selected" id="role" :options="options"></b-form-select>
                             </b-form-group>
@@ -59,7 +59,7 @@
             return{
                 user_data: null,
                 selected: null,
-                is_staff: true,
+                is_clerk: false,
                 options: [
                     { value: "Admin", text: "Admin" },
                     { value: "Billing Clerk", text: "Billing Clerk"}
@@ -75,12 +75,20 @@
                 axios.get("{% url 'user_list' %}" + {{ id }})
                 .then(response =>{
                     this.user_data = response.data
-                    if (response.data.groups[0] != "Customers"){
+<!--                    if (response.data.groups[0] != "Customers"){-->
+<!--                        this.selected = response.data.groups[0]-->
+<!--                    }-->
+<!--                    else{-->
+<!--                        delete this.user_data['groups']-->
+<!--                        this.is_staff = false-->
+<!--                    }-->
+
+                    if (response.data.groups[0] == "Billing Clerk"){
                         this.selected = response.data.groups[0]
+                        this.is_clerk = true
                     }
                     else{
                         delete this.user_data['groups']
-                        this.is_staff = false
                     }
                 })
                 .catch(error => {

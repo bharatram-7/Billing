@@ -52,10 +52,10 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Cannot change customer's roles")
         # Update group only if it's not the same as current group & can't edit another admin
         if groups and instance.groups.all()[0] != groups[0]:
+            if current_group == "Admin":
+                raise serializers.ValidationError("Cannot edit self/another admin's role")
             if instance.id != self.context['request'].user.id:
                 user.groups.set(groups)
-            elif current_group == "Admin":
-                raise serializers.ValidationError("Cannot edit self/another admin's role")
 
         instance.name = validated_data['name']
         if instance.email != validated_data['email']:

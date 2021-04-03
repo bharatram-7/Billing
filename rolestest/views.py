@@ -22,7 +22,7 @@ from django_filters import rest_framework as filters
 # Importing django messages
 
 from django.contrib import messages
-
+import os
 # Create your views here.
 
 
@@ -91,7 +91,7 @@ def signup(request):
         except Exception as e:
             print(e)
             user.delete()
-            return redirect('emailfailure.html')
+            return render(request, 'authentication/emailfailure.html')
     else:
         context = {
             "form": form
@@ -121,9 +121,15 @@ def create_staff(request):
             'uid': urlsafe_base64_encode(force_bytes(user.pk)),
             'token': account_activation_token.make_token(user),
         })
-        user.email_user(subject, message)
-        messages.success(request, "User successfully created")
-        return redirect('users')
+        try:
+            user.email_user(subject, message)
+            messages.success(request, "User successfully created")
+            return redirect('users')
+        except Exception as e:
+            print(e)
+            user.delete()
+            messages.error(request, "Error in triggering email. User not created")
+            return redirect('users')
     else:
         context = {
             "form": form
@@ -538,7 +544,9 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
         return CustomUser.objects.all().exclude(id=8).exclude(id=23)
 
     def perform_destroy(self, instance):
-        if instance.id == self.request.user.id:
-            raise serializers.ValidationError("Can't delete self")
+        user = CustomUser.objects.get(pk=instance.id)
+        group = user.groups.all()[0].name
+        if instance.id == self.request.user.id or group == "Admin":
+            raise serializers.ValidationError("Can't delete an admin")
         instance.delete()
 

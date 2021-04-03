@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils import timezone
-from .validators import image_restriction, price_restriction
+from .validators import image_restriction, price_restriction, active_item_check, quantity_validity
 
 
 class CustomUserManager(BaseUserManager):
@@ -37,7 +37,7 @@ class CustomUserManager(BaseUserManager):
 class CustomUser(AbstractUser):
     username = None
     email = models.EmailField('Email', unique=True)
-    name = models.TextField('User name', max_length=50, blank=False)
+    name = models.CharField('User name', max_length=50, blank=False)
     user_activated = models.BooleanField(default=False)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['name']
@@ -88,8 +88,8 @@ class CartManager(models.Manager):
 
 class CartItem(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    quantity = models.PositiveSmallIntegerField(blank=False, null=False)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, validators=[active_item_check])
+    quantity = models.PositiveSmallIntegerField(blank=False, null=False, validators=[quantity_validity])
 
     objects = CartManager()
 
