@@ -187,12 +187,11 @@ class OrderWithItemsSerializer(serializers.ModelSerializer):
                 if items[item["item"]] == item["price"]:
                     item["order"] = order
                     PurchasedItem.objects.create(**item)
-                    no_item = False
-            if no_item:
-                order.delete()
-                raise serializers.ValidationError("Invalid items are found in the cart.")
+                else:
+                    order.delete()
+                    raise serializers.ValidationError("Invalid items are found in the cart.")
             return order
-        except:
+        except Exception as e:
             order.delete()
             raise serializers.ValidationError("Invalid items are found in the cart.")
 

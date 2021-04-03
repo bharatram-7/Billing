@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.contrib.auth import login
 from django.views.generic import ListView, View
-from django.http import HttpResponse
 from .models import *
 from django.contrib.auth.models import Group
 from .forms import CreateCustomerForm, CreateStaffForm, ItemForm
@@ -9,7 +8,7 @@ from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from rest_framework import generics, permissions
 from .serializers import *
-from .permissions import CustomDjangoModelPermissions, OrderStatusPermission, OrderRatingPermission
+from .permissions import CustomDjangoModelPermissions, OrderStatusPermission, OrderRatingPermission, AdminPermission
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.encoding import force_bytes
@@ -22,7 +21,6 @@ from django_filters import rest_framework as filters
 # Importing django messages
 
 from django.contrib import messages
-import os
 # Create your views here.
 
 
@@ -389,31 +387,31 @@ class MenuWithItemList(generics.ListAPIView):
 
 class MenuList(generics.ListCreateAPIView):
     serializer_class = MenuSerializer
-    permission_classes = [permissions.IsAuthenticated, CustomDjangoModelPermissions]
+    permission_classes = [permissions.IsAuthenticated, CustomDjangoModelPermissions, AdminPermission]
 
     def get_queryset(self):
-        group = self.request.user.groups.filter(user=self.request.user)[0]
-        if group.name == "Admin":
-            return Menu.objects.all()
-        else:
-            return Menu.objects.none()
+        return Menu.objects.all()
 
 
 class MenuDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = MenuWithItemsSerializer
-    permission_classes = [permissions.IsAuthenticated, CustomDjangoModelPermissions]
+    permission_classes = [permissions.IsAuthenticated, CustomDjangoModelPermissions, AdminPermission]
 
     def get_queryset(self):
-        group = self.request.user.groups.filter(user=self.request.user)[0]
-        if group.name == "Admin":
-            return Menu.objects.all()
-        else:
-            return Menu.objects.none()
+        return Menu.objects.all()
+
+
+class ItemList(generics.ListCreateAPIView):
+    serializer_class = ItemSerializer
+    permission_classes = [permissions.IsAuthenticated, CustomDjangoModelPermissions, AdminPermission]
+
+    def get_queryset(self):
+        return Item.objects.all()
 
 
 class ItemDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ItemSerializer
-    permission_classes = [permissions.IsAuthenticated, CustomDjangoModelPermissions]
+    permission_classes = [permissions.IsAuthenticated, CustomDjangoModelPermissions, AdminPermission]
 
     def get_queryset(self):
         return Item.objects.all()
@@ -465,11 +463,7 @@ class CreateOrderWithItems(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated, CustomDjangoModelPermissions]
 
     def get_queryset(self):
-        group = self.request.user.groups.filter(user=self.request.user)[0]
-        if group.name == "Customers":
-            return Order.objects.filter(user=self.request.user)
-        else:
-            return Order.objects.all()
+        return Order.objects.none()
 
     def perform_create(self, serializer):
         group = self.request.user.groups.filter(user=self.request.user)[0]
@@ -501,11 +495,7 @@ class OrderUpdate(generics.UpdateAPIView):
     permission_classes = [permissions.IsAuthenticated, CustomDjangoModelPermissions, OrderStatusPermission]
 
     def get_queryset(self):
-        group = self.request.user.groups.filter(user=self.request.user)[0]
-        if group.name == "Customers":
-            return Order.objects.filter(user=self.request.user)
-        else:
-            return Order.objects.all()
+        return Order.objects.all()
 
 
 class OrderRating(generics.RetrieveUpdateAPIView):
@@ -513,35 +503,25 @@ class OrderRating(generics.RetrieveUpdateAPIView):
     permission_classes = [permissions.IsAuthenticated, CustomDjangoModelPermissions, OrderRatingPermission]
 
     def get_queryset(self):
-        group = self.request.user.groups.filter(user=self.request.user)[0]
-        if group.name == "Customers":
-            return Order.objects.filter(user=self.request.user)
-        else:
-            return Order.objects.none()
-
-
-class PurchasedItemList(generics.ListCreateAPIView):
-    serializer_class = PurchasedItemSerializer
-    permission_classes = [permissions.IsAuthenticated, CustomDjangoModelPermissions]
-
-    def get_queryset(self):
-        return PurchasedItem.objects.all()
+        return Order.objects.filter(user=self.request.user)
 
 
 class UserList(generics.ListCreateAPIView):
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated, CustomDjangoModelPermissions]
+    permission_classes = [permissions.IsAuthenticated, CustomDjangoModelPermissions, AdminPermission]
 
     def get_queryset(self):
-        return CustomUser.objects.all().exclude(id=8).exclude(id=23)
+        return CustomUser.objects.all().exclude(email="deleteduser@cafe.co.in").exclude(
+            email="walkincustomer@cafe.co.in")
 
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated, CustomDjangoModelPermissions]
+    permission_classes = [permissions.IsAuthenticated, CustomDjangoModelPermissions, AdminPermission]
 
     def get_queryset(self):
-        return CustomUser.objects.all().exclude(id=8).exclude(id=23)
+        return CustomUser.objects.all().exclude(email="deleteduser@cafe.co.in").exclude(
+            email="walkincustomer@cafe.co.in")
 
     def perform_destroy(self, instance):
         user = CustomUser.objects.get(pk=instance.id)

@@ -55,7 +55,7 @@ Menu
     },
     methods: {
         update: function(){
-            axios.patch("{% url 'root' %}" + "api/v1/updateorder/" + this.order_id, {
+            axios.patch("{% url 'root' %}" + "api/v1/orders/" + this.order_id + "/status", {
                 status: "D"
             })
             .then(response =>{

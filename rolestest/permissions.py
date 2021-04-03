@@ -28,3 +28,16 @@ class OrderRatingPermission(permissions.BasePermission):
             return True
         else:
             return False
+
+
+class AdminPermission(permissions.BasePermission):
+    message = "You're not allowed to access this endpoint"
+
+    def has_permission(self, request, view):
+        group = request.user.groups.filter(user=request.user)[0]
+        if group.name == "Admin":
+            return True
+        else:
+            return False
+
+
