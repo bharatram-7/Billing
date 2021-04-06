@@ -30,7 +30,6 @@ def home(request):
     group = request.user.groups.filter(user=request.user)[0]
     if group.name == "Customers":
         return redirect(reverse('menu'))
-
     return redirect(reverse('staff_orders'))
 
 
@@ -140,19 +139,9 @@ class ActiveMenuList(LoginRequiredMixin, ListView):
     context_object_name = 'menus'
     template_name = 'main/menu.html'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['name'] = self.request.user.name
-        return context
-
 
 class Checkout(LoginRequiredMixin, ListView):
     template_name = 'main/checkout.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['name'] = self.request.user.name
-        return context
 
     def get_queryset(self):
         return
@@ -166,7 +155,6 @@ class Orders(LoginRequiredMixin, ListView):
         group = self.request.user.groups.filter(user=self.request.user)[0]
         if group:
             context['group'] = group.name
-        context['name'] = self.request.user.name
         return context
 
     def get_queryset(self):
@@ -215,11 +203,6 @@ class StaffOrders(LoginRequiredMixin, UserPassesTestMixin, ListView):
         except:
             return True
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['user'] = self.request.user
-        return context
-
     def get_queryset(self):
         return
 
@@ -233,11 +216,6 @@ class UsersView(LoginRequiredMixin, UserPassesTestMixin, ListView):
             return True
         except:
             return False
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['user'] = self.request.user
-        return context
 
     def get_queryset(self):
         return
@@ -265,11 +243,6 @@ class MenusView(LoginRequiredMixin, UserPassesTestMixin, ListView):
             return True
         except:
             return False
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['user'] = self.request.user
-        return context
 
     def get_queryset(self):
         return
