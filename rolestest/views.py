@@ -315,7 +315,8 @@ class ItemDetailView(LoginRequiredMixin, UserPassesTestMixin, View):
             pass
         context = {
             "form": form,
-            "id": kwargs['pk']
+            "id": kwargs['pk'],
+            "menu_id": kwargs['menu_id']
         }
         return render(request, self.template_name, context=context)
 
